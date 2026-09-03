@@ -1,26 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { PetKind, Product } from "@/lib/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import { t, type Lang } from "@/lib/i18n";
-import { priceFor } from "@/lib/calc";
+import {
+  categoriesFor,
+  dimsForCategory,
+  priceFor,
+  type SizeCategory,
+} from "@/lib/calc";
 import CoffinArt from "./CoffinArt";
 import CalculatorModal from "./CalculatorModal";
 import ContactModal from "./ContactModal";
 
-const PET_GLYPH: Record<PetKind, string> = {
-  cat: "🐈",
-  dog: "🐕",
-  reptile: "🦎",
-  rodent: "🐹",
-};
-
-export default function SiteShell({ products }: { products: Product[] }) {
+export default function SiteShell({
+  products,
+  engraving,
+}: {
+  products: Product[];
+  engraving: EngravingOption[];
+}) {
   const [lang, setLang] = useState<Lang>("uk");
   const [pet, setPet] = useState<PetKind>("cat");
+  const [categoryId, setCategoryId] = useState<string>(categoriesFor("cat")[0].id);
   const [calcOpen, setCalcOpen] = useState(false);
-  const [calcPreset, setCalcPreset] = useState<{ pet: PetKind; productId?: string } | null>(null);
+  const [calcPreset, setCalcPreset] = useState<{
+    pet: PetKind;
+    categoryId?: string;
+    productId?: string;
+  } | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +40,7 @@ export default function SiteShell({ products }: { products: Product[] }) {
       const saved = localStorage.getItem("spokiy_lang");
       if (saved === "uk" || saved === "en") setLang(saved);
     } catch {
-      /* приватний режим — просто лишаємо українську */
+      /* приватний режим — лишаємо українську */
     }
   }, []);
 
@@ -49,10 +58,13 @@ export default function SiteShell({ products }: { products: Product[] }) {
     }
   };
 
-  const openCalc = useCallback((preset?: { pet: PetKind; productId?: string }) => {
-    setCalcPreset(preset ?? null);
-    setCalcOpen(true);
-  }, []);
+  const openCalc = useCallback(
+    (preset?: { pet: PetKind; categoryId?: string; productId?: string }) => {
+      setCalcPreset(preset ?? null);
+      setCalcOpen(true);
+    },
+    []
+  );
 
   const scrollRail = (dir: 1 | -1) => {
     const el = railRef.current;
@@ -63,9 +75,20 @@ export default function SiteShell({ products }: { products: Product[] }) {
   const petLabel = (p: PetKind) =>
     ({ cat: L.petCat, dog: L.petDog, reptile: L.petReptile, rodent: L.petRodent })[p];
 
+  const cats = useMemo(() => categoriesFor(pet), [pet]);
+  const category: SizeCategory =
+    cats.find((c) => c.id === categoryId) ?? cats[0];
+  const dims = useMemo(() => dimsForCategory(category), [category]);
+
   const list = products
     .filter((p) => p.pet === pet)
     .sort((a, b) => a.sort - b.sort);
+
+  const choosePet = (p: PetKind) => {
+    setPet(p);
+    setCategoryId(categoriesFor(p)[0].id);
+    railRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -144,14 +167,33 @@ export default function SiteShell({ products }: { products: Product[] }) {
                 role="tab"
                 className="tab"
                 aria-selected={p === pet}
-                onClick={() => {
-                  setPet(p);
-                  railRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-                }}
+                onClick={() => choosePet(p)}
               >
                 {petLabel(p)}
               </button>
             ))}
+          </div>
+
+          {/* розмірні групи всередині типу тварини */}
+          <div className="sizebar">
+            <span className="caps muted sizebar-label">{L.sizeGroup}</span>
+            <div className="sizebar-chips">
+              {cats.map((c) => (
+                <button
+                  key={c.id}
+                  className="size-chip"
+                  aria-pressed={c.id === category.id}
+                  onClick={() => setCategoryId(c.id)}
+                >
+                  <span className="size-chip-name">
+                    {lang === "uk" ? c.label_uk : c.label_en}
+                  </span>
+                  <span className="size-chip-ex">
+                    {lang === "uk" ? c.examples_uk : c.examples_en}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="rail-wrap">
@@ -160,9 +202,14 @@ export default function SiteShell({ products }: { products: Product[] }) {
                 <article className="card" key={p.id}>
                   <div className="card-media">
                     {p.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.image} alt={lang === "uk" ? p.name_uk : p.name_en} />
                     ) : (
-                      <CoffinArt art={p.art} label={lang === "uk" ? p.name_uk : p.name_en} />
+                      <CoffinArt
+                        art={p.art}
+                        pet={p.pet}
+                        label={lang === "uk" ? p.name_uk : p.name_en}
+                      />
                     )}
                     <span className={`card-badge caps ${p.in_stock ? "" : "out"}`}>
                       {p.in_stock ? L.inStock : L.outStock}
@@ -173,23 +220,24 @@ export default function SiteShell({ products }: { products: Product[] }) {
                   <div className="card-material">
                     {lang === "uk" ? p.material_uk : p.material_en}
                   </div>
-                  <div className="card-material" style={{ marginTop: -8 }}>
+                  <div className="card-material" style={{ marginTop: -6 }}>
                     {lang === "uk" ? p.desc_uk : p.desc_en}
                   </div>
 
                   <div className="card-meta">
                     <span className="caps muted">
-                      {L.sizeRange} {p.min_length_cm}–{p.max_length_cm} см
+                      {L.typicalSize} · {dims.length}×{dims.width}×{dims.height} см
                     </span>
                     <span className="card-price">
-                      <small>{L.fromPrice}</small>
-                      {priceFor(p, p.min_length_cm).toLocaleString("uk-UA")} {L.uah}
+                      {priceFor(p, dims.length).toLocaleString("uk-UA")} {L.uah}
                     </span>
                   </div>
 
                   <button
                     className="btn btn-sm card-cta"
-                    onClick={() => openCalc({ pet: p.pet, productId: p.id })}
+                    onClick={() =>
+                      openCalc({ pet: p.pet, categoryId: category.id, productId: p.id })
+                    }
                   >
                     {L.orderThis}
                   </button>
@@ -247,6 +295,7 @@ export default function SiteShell({ products }: { products: Product[] }) {
         <CalculatorModal
           lang={lang}
           products={products}
+          engraving={engraving}
           preset={calcPreset}
           onClose={() => setCalcOpen(false)}
         />
@@ -267,5 +316,3 @@ function Arrow({ dir }: { dir: "left" | "right" }) {
     </svg>
   );
 }
-
-export { PET_GLYPH };

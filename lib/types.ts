@@ -33,6 +33,20 @@ export interface Product {
   art: ArtPattern;
 }
 
+/** Платна додаткова послуга: нанесення імені, дат, емблеми, вірша */
+export interface EngravingOption {
+  id: string;
+  sort: number;
+  label_uk: string;
+  label_en: string;
+  hint_uk: string;
+  hint_en: string;
+  price_uah: number;
+  /** чи потрібно клієнту вписати текст */
+  needs_text: boolean;
+  enabled: boolean;
+}
+
 export interface OrderItem {
   product_id: string;
   product_name: string;
@@ -43,11 +57,21 @@ export interface OrderItem {
   height_cm: number;
 }
 
+export interface OrderEngraving {
+  /** id обраних послуг */
+  ids: string[];
+  /** назви послуг мовою замовлення — щоб лист не залежав від змін у прайсі */
+  labels: string[];
+  text: string;
+  price_uah: number;
+}
+
 export interface Order {
   id: string;
   created_at: string;
   pet: PetKind;
   weight_kg: number;
+  category_id: string;
   first_name: string;
   last_name: string;
   phone: string;
@@ -56,5 +80,7 @@ export interface Order {
   payment: "transfer";
   comment: string;
   item: OrderItem;
+  engraving: OrderEngraving;
+  total_uah: number;
   status: "new" | "in_work" | "done" | "cancelled";
 }

@@ -35,6 +35,8 @@ export const dict = {
     sizeRange: "Довжина",
     materialLabel: "Матеріал",
     orderThis: "Обрати цю модель",
+    sizeGroup: "Розмір",
+    typicalSize: "Типовий розмір",
 
     // калькулятор
     calcTitle: "Прорахувати труну",
@@ -55,6 +57,20 @@ export const dict = {
     calcCustom: "Виготовимо індивідуально",
     calcBack: "Назад",
     calcChoose: "Обрати",
+    calcCategoryLabel: "Розмір · порода",
+    calcWeightExact: "Або вкажіть точну вагу",
+
+    // гравіювання
+    engravingTitle: "Індивідуальне нанесення",
+    engravingSub: "Необов'язково. Додає 1–3 дні до терміну виготовлення.",
+    engravingTextLabel: "Текст для нанесення",
+    engravingTextPlaceholder: "Наприклад: Мурчик · 2014—2026",
+    engravingTextRequired: "Впишіть текст для нанесення",
+    coffinLabel: "Труна",
+    totalLabel: "Разом",
+    leadTitle: "Термін",
+    leadBase: "Виготовлення 1–3 дні",
+    leadEngraving: "З нанесенням +1–3 дні",
 
     // форма
     formTitle: "Оформлення замовлення",
@@ -96,10 +112,10 @@ export const dict = {
       "Ви вказуєте тип тварини та приблизну вагу — ми рахуємо внутрішній розмір.",
     footerStep2: "Виготовлення",
     footerStep2Text:
-      "1–3 дні. Дерево, натуральна тканина, фурнітура з покриттям під золото.",
+      "1–3 дні. Дерево, натуральна тканина, фурнітура під золото. Індивідуальне нанесення — плюс 1–3 дні.",
     footerStep3: "Доставка",
     footerStep3Text:
-      "Відправка на відділення пошти по всій Україні. Пакування без маркувань.",
+      "Відправляємо того ж дня — далі термін залежить від пошти. По Дніпру привозимо протягом кількох годин. Пакування без маркувань.",
     footerRights: "Усі права захищені",
     footerPolicy: "Конфіденційність",
   },
@@ -138,6 +154,8 @@ export const dict = {
     sizeRange: "Length",
     materialLabel: "Material",
     orderThis: "Choose this model",
+    sizeGroup: "Size",
+    typicalSize: "Typical size",
 
     calcTitle: "Size my casket",
     calcStep1: "Step 1 · Your companion",
@@ -157,6 +175,19 @@ export const dict = {
     calcCustom: "Custom build",
     calcBack: "Back",
     calcChoose: "Choose",
+    calcCategoryLabel: "Size · breed",
+    calcWeightExact: "Or enter the exact weight",
+
+    engravingTitle: "Personal engraving",
+    engravingSub: "Optional. Adds 1–3 days to production.",
+    engravingTextLabel: "Text to engrave",
+    engravingTextPlaceholder: "For example: Murchyk · 2014—2026",
+    engravingTextRequired: "Please enter the text to engrave",
+    coffinLabel: "Casket",
+    totalLabel: "Total",
+    leadTitle: "Lead time",
+    leadBase: "Made in 1–3 days",
+    leadEngraving: "With engraving +1–3 days",
 
     formTitle: "Checkout",
     formFirstName: "First name",
@@ -194,10 +225,10 @@ export const dict = {
       "You give the animal type and approximate weight — we calculate the internal size.",
     footerStep2: "Craft",
     footerStep2Text:
-      "1–3 days. Wood, natural cloth, gold-finished hardware.",
+      "1–3 days. Wood, natural cloth, gold-finished hardware. Personal engraving adds 1–3 days.",
     footerStep3: "Delivery",
     footerStep3Text:
-      "Shipped to any post office in Ukraine. Unmarked packaging.",
+      "Dispatched the same day — the rest is up to the postal service. Within Dnipro we deliver in a few hours. Unmarked packaging.",
     footerRights: "All rights reserved",
     footerPolicy: "Privacy",
   },

@@ -1019,3 +1019,207 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─────────────── розмірні групи в каталозі ─────────────── */
+
+.sizebar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px var(--pad) 0;
+  flex-wrap: wrap;
+}
+
+.sizebar-label {
+  padding-top: 12px;
+  flex: none;
+}
+
+.sizebar-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.size-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  border: 1px solid var(--line);
+  padding: 9px 14px;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.size-chip:hover {
+  border-color: var(--ink);
+}
+
+.size-chip[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: var(--paper-2);
+}
+
+.size-chip-name {
+  font-size: 13px;
+}
+
+.size-chip-ex {
+  font-size: 11px;
+  color: var(--grey);
+}
+
+.size-chip[aria-pressed="true"] .size-chip-name {
+  color: var(--gold);
+}
+
+/* ─────────────── вибір групи в калькуляторі ─────────────── */
+
+.cat-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.cat-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  border: 1px solid var(--line);
+  padding: 13px 16px;
+  transition: all 0.2s;
+}
+
+.cat-option:hover {
+  border-color: var(--ink);
+}
+
+.cat-option[aria-pressed="true"] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.cat-name {
+  font-size: 14px;
+}
+
+.cat-ex {
+  font-size: 12px;
+  color: var(--grey);
+}
+
+.cat-option[aria-pressed="true"] .cat-name {
+  color: var(--gold);
+}
+
+/* ─────────────── додаткові послуги ─────────────── */
+
+.addons {
+  border: 1px solid var(--line);
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.addons-head {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.addon {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.addon input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--grey);
+  margin: 1px 0 0;
+  position: relative;
+  flex: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.addon input:checked {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+
+.addon input:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.addon-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.addon-name {
+  font-size: 14px;
+}
+
+.addon-hint {
+  font-size: 12px;
+  color: var(--grey);
+}
+
+.addon-price {
+  font-size: 13px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--grey);
+}
+
+.addon[data-on] .addon-price {
+  color: var(--gold);
+}
+
+/* ─────────────── підсумок ─────────────── */
+
+.totals {
+  border: 1px solid var(--ink);
+  padding: 16px 18px;
+  margin-bottom: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 13px;
+}
+
+.totals-sum {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: 2px;
+  font-size: 16px !important;
+}
+
+.totals-lead {
+  display: block !important;
+  color: var(--grey);
+  letter-spacing: 0.14em;
+}

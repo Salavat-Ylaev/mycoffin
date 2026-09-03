@@ -36,7 +36,7 @@ export async function mailOwner(o: Order): Promise<boolean> {
       from: from(),
       to,
       replyTo: o.email || undefined,
-      subject: `Нове замовлення №${o.id} — ${o.item.product_name}`,
+      subject: `Нове замовлення №${o.id} — ${o.item.product_name}, ${o.total_uah} грн`,
       text: orderToText(o),
     });
     return true;
@@ -53,6 +53,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
   const details =
     process.env.NEXT_PUBLIC_PAYMENT_DETAILS || "Реквізити надішле менеджер";
   const phone = process.env.NEXT_PUBLIC_PHONE || "";
+  const hasEngraving = Boolean(o.engraving && o.engraving.ids.length);
 
   const html = `
 <div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
@@ -71,7 +72,11 @@ export async function mailCustomer(o: Order): Promise<boolean> {
     ${row("Модель", esc(o.item.product_name))}
     ${row("Матеріал", esc(o.item.material))}
     ${row("Внутрішній розмір", `${o.item.length_cm} × ${o.item.width_cm} × ${o.item.height_cm} см`)}
-    ${row("Вартість", money(o.item.price_uah))}
+    ${row("Труна", money(o.item.price_uah))}
+    ${hasEngraving ? row("Нанесення", `${esc(o.engraving.labels.join(", "))} — ${money(o.engraving.price_uah)}`) : ""}
+    ${hasEngraving && o.engraving.text ? row("Текст нанесення", `«${esc(o.engraving.text)}»`) : ""}
+    ${row("<b>Разом</b>", `<b>${money(o.total_uah)}</b>`)}
+    ${row("Термін виготовлення", hasEngraving ? "1–3 дні + 1–3 дні на нанесення" : "1–3 дні")}
     ${row("Відділення пошти", esc(o.post_office))}
     ${row("Оплата", "Переказ на реквізити")}
   </table>
@@ -102,7 +107,14 @@ export async function mailCustomer(o: Order): Promise<boolean> {
       text:
         `Вітаємо, ${o.first_name}.\n\nМи отримали ваше замовлення №${o.id}.\n` +
         `Модель: ${o.item.product_name}\nРозмір: ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см\n` +
-        `Вартість: ${money(o.item.price_uah)}\nВідділення: ${o.post_office}\n\n` +
+        `Труна: ${money(o.item.price_uah)}\n` +
+        (hasEngraving
+          ? `Нанесення: ${o.engraving.labels.join(", ")} — ${money(o.engraving.price_uah)}\n` +
+            (o.engraving.text ? `Текст: «${o.engraving.text}»\n` : "")
+          : "") +
+        `Разом: ${money(o.total_uah)}\n` +
+        `Термін: ${hasEngraving ? "1–3 дні + 1–3 дні на нанесення" : "1–3 дні"}\n` +
+        `Відділення: ${o.post_office}\n\n` +
         `Реквізити: ${details}\n`,
     });
     return true;

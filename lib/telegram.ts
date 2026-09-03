@@ -1,3 +1,4 @@
+import { categoryById } from "./calc";
 import type { Order } from "./types";
 
 const PET_LABEL: Record<string, string> = {
@@ -7,15 +8,27 @@ const PET_LABEL: Record<string, string> = {
   rodent: "Гризун",
 };
 
+const money = (n: number) => `${n.toLocaleString("uk-UA")} грн`;
+
 export function orderToText(o: Order): string {
+  const cat = categoryById(o.category_id);
+  const hasEngraving = o.engraving && o.engraving.ids.length > 0;
+
   return [
     `🕯 НОВЕ ЗАМОВЛЕННЯ №${o.id}`,
     ``,
     `Тварина: ${PET_LABEL[o.pet] ?? o.pet}, ~${o.weight_kg} кг`,
+    cat ? `Група: ${cat.label_uk} (${cat.examples_uk})` : ``,
     `Модель: ${o.item.product_name}`,
     `Матеріал: ${o.item.material}`,
     `Розмір (внутр.): ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см`,
-    `Ціна: ${o.item.price_uah} грн`,
+    `Труна: ${money(o.item.price_uah)}`,
+    hasEngraving
+      ? `Нанесення: ${o.engraving.labels.join(", ")} — ${money(o.engraving.price_uah)}` +
+        (o.engraving.text ? `\nТекст: «${o.engraving.text}»` : ``)
+      : `Нанесення: ні`,
+    `РАЗОМ: ${money(o.total_uah)}`,
+    hasEngraving ? `Термін: 1–3 дні + 1–3 дні на нанесення` : `Термін: 1–3 дні`,
     ``,
     `Клієнт: ${o.last_name} ${o.first_name}`,
     `Телефон: ${o.phone}`,

@@ -23,11 +23,19 @@ if (!url || !key) {
 }
 
 const products = JSON.parse(readFileSync(join(root, "data/products.json"), "utf8"));
+const engraving = JSON.parse(readFileSync(join(root, "data/engraving.json"), "utf8"));
 const sb = createClient(url, key, { auth: { persistSession: false } });
 
-const { error } = await sb.from("products").upsert(products);
-if (error) {
-  console.error("Ошибка:", error.message);
+const r1 = await sb.from("products").upsert(products);
+if (r1.error) {
+  console.error("Ошибка (products):", r1.error.message);
   process.exit(1);
 }
-console.log(`Готово: залито ${products.length} товаров.`);
+
+const r2 = await sb.from("engraving_options").upsert(engraving);
+if (r2.error) {
+  console.error("Ошибка (engraving_options):", r2.error.message);
+  process.exit(1);
+}
+
+console.log(`Готово: ${products.length} товаров, ${engraving.length} услуг нанесения.`);

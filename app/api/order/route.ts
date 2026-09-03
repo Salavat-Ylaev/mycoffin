@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts, createOrder } from "@/lib/store";
-import { calcDimensions, priceFor } from "@/lib/calc";
+import { getProducts, getEngravingOptions, createOrder } from "@/lib/store";
+import { calcDimensions, categoryForWeight, priceFor } from "@/lib/calc";
 import { notifyTelegram } from "@/lib/telegram";
 import { mailOwner, mailCustomer } from "@/lib/mail";
 import { PET_KINDS, type Order, type PetKind } from "@/lib/types";
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
     const email = clean(body.email, 120);
     const post_office = clean(body.post_office, 160);
     const comment = clean(body.comment, 700);
+    const engravingText = clean(body.engraving_text, 300);
 
     if (!first_name || !last_name || !post_office) {
       return NextResponse.json({ error: "missing fields" }, { status: 400 });
@@ -59,16 +60,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "product not found" }, { status: 400 });
     }
 
+    const lang = body.lang === "en" ? "en" : "uk";
+
     // розміри й ціну рахуємо на сервері — клієнтським даним не довіряємо
     const dims = calcDimensions(pet, weight);
     const price = priceFor(product, dims.length);
-    const lang = body.lang === "en" ? "en" : "uk";
+
+    // додаткові послуги теж перевіряємо за нашим прайсом
+    const allOptions = await getEngravingOptions();
+    const requested: string[] = Array.isArray(body.engraving_ids)
+      ? body.engraving_ids.map((x: unknown) => clean(x, 40))
+      : [];
+    const selected = allOptions.filter(
+      (o) => o.enabled && requested.includes(o.id)
+    );
+    const engravingPrice = selected.reduce((s, o) => s + Number(o.price_uah || 0), 0);
+
+    if (selected.some((o) => o.needs_text) && !engravingText) {
+      return NextResponse.json({ error: "engraving text required" }, { status: 400 });
+    }
 
     const order: Order = {
       id: orderNumber(),
       created_at: new Date().toISOString(),
       pet,
       weight_kg: Math.round(weight * 100) / 100,
+      category_id: clean(body.category_id, 40) || categoryForWeight(pet, weight).id,
       first_name,
       last_name,
       phone,
@@ -86,6 +103,13 @@ export async function POST(req: NextRequest) {
         width_cm: dims.width,
         height_cm: dims.height,
       },
+      engraving: {
+        ids: selected.map((o) => o.id),
+        labels: selected.map((o) => (lang === "en" ? o.label_en : o.label_uk)),
+        text: selected.length ? engravingText : "",
+        price_uah: engravingPrice,
+      },
+      total_uah: price + engravingPrice,
     };
 
     await createOrder(order);
@@ -105,6 +129,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       id: order.id,
       price: order.item.price_uah,
+      engraving_price: engravingPrice,
+      total: order.total_uah,
       notified: { telegram: tg, owner_email: own, customer_email: cust },
     });
   } catch (e) {

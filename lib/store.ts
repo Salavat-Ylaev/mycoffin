@@ -2,9 +2,11 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import seedJson from "@/data/products.json";
-import type { Order, Product } from "./types";
+import engravingJson from "@/data/engraving.json";
+import type { EngravingOption, Order, Product } from "./types";
 
 const seed = seedJson as unknown as Product[];
+const engravingSeed = engravingJson as unknown as EngravingOption[];
 
 /**
  * Сховище даних із двома режимами:
@@ -31,11 +33,17 @@ export function supabase(): SupabaseClient {
 const DATA_DIR = path.join(process.cwd(), "data");
 const PRODUCTS_FILE = path.join(DATA_DIR, "products.json");
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
+const ENGRAVING_FILE = path.join(DATA_DIR, "engraving.json");
 
 // пам'ять — використовується, коли диск недоступний для запису
-const mem: { products: Product[] | null; orders: Order[] } = {
+const mem: {
+  products: Product[] | null;
+  orders: Order[];
+  engraving: EngravingOption[] | null;
+} = {
   products: null,
   orders: [],
+  engraving: null,
 };
 
 async function readJson<T>(file: string, fallback: T): Promise<T> {
@@ -104,6 +112,47 @@ export async function deleteProduct(id: string): Promise<void> {
   const list = (await getProducts()).filter((x) => x.id !== id);
   mem.products = list;
   await writeJson(PRODUCTS_FILE, list);
+}
+
+/* ─────────────────────────── гравіювання ─────────────────────────── */
+
+export async function getEngravingOptions(): Promise<EngravingOption[]> {
+  if (usingSupabase) {
+    const { data, error } = await supabase()
+      .from("engraving_options")
+      .select("*")
+      .order("sort");
+    if (error) throw new Error(error.message);
+    // якщо таблиця ще порожня — віддаємо стартовий набір
+    return (data && data.length ? data : engravingSeed) as EngravingOption[];
+  }
+
+  if (mem.engraving) return mem.engraving;
+  const fromDisk = await readJson<EngravingOption[]>(ENGRAVING_FILE, engravingSeed);
+  mem.engraving = fromDisk.length ? fromDisk : engravingSeed;
+  return mem.engraving;
+}
+
+export async function upsertEngravingOption(
+  o: EngravingOption
+): Promise<EngravingOption> {
+  if (usingSupabase) {
+    const { data, error } = await supabase()
+      .from("engraving_options")
+      .upsert(o)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data as EngravingOption;
+  }
+
+  const list = [...(await getEngravingOptions())];
+  const i = list.findIndex((x) => x.id === o.id);
+  if (i >= 0) list[i] = o;
+  else list.push(o);
+  mem.engraving = list;
+  await writeJson(ENGRAVING_FILE, list);
+  return o;
 }
 
 /* ─────────────────────────── замовлення ─────────────────────────── */

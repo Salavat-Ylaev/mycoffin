@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { PetKind, Product } from "@/lib/types";
+import { useEffect, useMemo, useState } from "react";
+import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
-import { calcDimensions, pickOffers, SHAPES, type Dimensions, type Offer } from "@/lib/calc";
+import {
+  calcDimensions,
+  categoriesFor,
+  categoryForWeight,
+  pickOffers,
+  SHAPES,
+  type Dimensions,
+  type Offer,
+} from "@/lib/calc";
 import { t, type Lang } from "@/lib/i18n";
 import CoffinArt from "./CoffinArt";
 
@@ -17,19 +25,35 @@ const GLYPH: Record<PetKind, string> = {
 interface Props {
   lang: Lang;
   products: Product[];
-  preset: { pet: PetKind; productId?: string } | null;
+  engraving: EngravingOption[];
+  preset: { pet: PetKind; categoryId?: string; productId?: string } | null;
   onClose: () => void;
 }
 
-export default function CalculatorModal({ lang, products, preset, onClose }: Props) {
+export default function CalculatorModal({
+  lang,
+  products,
+  engraving,
+  preset,
+  onClose,
+}: Props) {
   const L = t(lang);
 
+  const startPet: PetKind = preset?.pet ?? "cat";
+  const startCat =
+    categoriesFor(startPet).find((c) => c.id === preset?.categoryId) ??
+    categoriesFor(startPet)[0];
+
   const [step, setStep] = useState(1);
-  const [pet, setPet] = useState<PetKind>(preset?.pet ?? "cat");
-  const [weight, setWeight] = useState<string>(String(SHAPES[preset?.pet ?? "cat"].defaultWeight));
+  const [pet, setPet] = useState<PetKind>(startPet);
+  const [categoryId, setCategoryId] = useState(startCat.id);
+  const [weight, setWeight] = useState<string>(String(startCat.refWeight));
   const [dims, setDims] = useState<Dimensions | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [chosen, setChosen] = useState<Offer | null>(null);
+
+  const [engIds, setEngIds] = useState<string[]>([]);
+  const [engText, setEngText] = useState("");
 
   const [form, setForm] = useState({
     first_name: "",
@@ -41,7 +65,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
   });
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
-  const [orderId, setOrderId] = useState("");
+  const [done, setDone] = useState<{ id: string; total: number } | null>(null);
 
   const payDetails =
     process.env.NEXT_PUBLIC_PAYMENT_DETAILS || "Реквізити надішле менеджер";
@@ -61,7 +85,30 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
   const petLabel = (p: PetKind) =>
     ({ cat: L.petCat, dog: L.petDog, reptile: L.petReptile, rodent: L.petRodent })[p];
 
-  const range = SHAPES[pet].weight;
+  const cats = useMemo(() => categoriesFor(pet), [pet]);
+  const options = useMemo(
+    () => engraving.filter((o) => o.enabled).sort((a, b) => a.sort - b.sort),
+    [engraving]
+  );
+
+  const engSelected = options.filter((o) => engIds.includes(o.id));
+  const engPrice = engSelected.reduce((s, o) => s + o.price_uah, 0);
+  const needsText = engSelected.some((o) => o.needs_text);
+  const total = (chosen?.price ?? 0) + engPrice;
+
+  const choosePet = (p: PetKind) => {
+    const c = categoriesFor(p)[0];
+    setPet(p);
+    setCategoryId(c.id);
+    setWeight(String(c.refWeight));
+  };
+
+  const chooseCategory = (id: string) => {
+    const c = cats.find((x) => x.id === id);
+    if (!c) return;
+    setCategoryId(id);
+    setWeight(String(c.refWeight));
+  };
 
   const calculate = () => {
     const w = Number(String(weight).replace(",", "."));
@@ -74,6 +121,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
     const list = pickOffers(products, pet, d, 4);
     setDims(d);
     setOffers(list);
+    setCategoryId(categoryForWeight(pet, w).id);
     // якщо прийшли з картки каталогу — одразу підсвічуємо ту модель
     const pre = preset?.productId
       ? list.find((o) => o.product.id === preset.productId)
@@ -82,8 +130,12 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
     setStep(2);
   };
 
+  const toggleEng = (id: string) =>
+    setEngIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+
   const submit = async () => {
     if (!chosen || !dims) return;
+
     const phoneOk = /^[\d+\s()\-]{9,20}$/.test(form.phone.trim());
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
 
@@ -93,6 +145,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
     }
     if (!phoneOk) return setError(L.formPhoneInvalid);
     if (!emailOk) return setError(L.formEmailInvalid);
+    if (needsText && !engText.trim()) return setError(L.engravingTextRequired);
 
     setError("");
     setSending(true);
@@ -102,18 +155,18 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pet,
+          category_id: categoryId,
           weight_kg: Number(String(weight).replace(",", ".")),
           ...form,
           product_id: chosen.product.id,
-          length_cm: dims.length,
-          width_cm: dims.width,
-          height_cm: dims.height,
+          engraving_ids: engIds,
+          engraving_text: engText,
           lang,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "failed");
-      setOrderId(data.id);
+      setDone({ id: data.id, total: data.total ?? total });
       setStep(4);
     } catch {
       setError(L.formError);
@@ -123,6 +176,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
   };
 
   const stepTitle = [L.calcStep1, L.calcStep2, L.calcStep3, L.calcStep4][step - 1];
+  const money = (n: number) => n.toLocaleString("uk-UA");
 
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -157,10 +211,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                       key={p}
                       className="pet-option"
                       aria-pressed={p === pet}
-                      onClick={() => {
-                        setPet(p);
-                        setWeight(String(SHAPES[p].defaultWeight));
-                      }}
+                      onClick={() => choosePet(p)}
                     >
                       <span className="pet-glyph">{GLYPH[p]}</span>
                       <span className="caps">{petLabel(p)}</span>
@@ -170,14 +221,35 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
               </div>
 
               <div className="field">
+                <label>{L.calcCategoryLabel}</label>
+                <div className="cat-picker">
+                  {cats.map((c) => (
+                    <button
+                      key={c.id}
+                      className="cat-option"
+                      aria-pressed={c.id === categoryId}
+                      onClick={() => chooseCategory(c.id)}
+                    >
+                      <span className="cat-name">
+                        {lang === "uk" ? c.label_uk : c.label_en}
+                      </span>
+                      <span className="cat-ex">
+                        {lang === "uk" ? c.examples_uk : c.examples_en}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="field">
                 <label>
-                  {L.calcWeightLabel} · {range[0]}–{range[1]}
+                  {L.calcWeightExact} · {L.calcWeightLabel}
                 </label>
                 <input
                   type="number"
                   inputMode="decimal"
-                  min={range[0]}
-                  max={range[1]}
+                  min={SHAPES[pet].weight[0]}
+                  max={SHAPES[pet].weight[1]}
                   step="0.1"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
@@ -189,7 +261,11 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
 
               {error && <div className="error">{error}</div>}
 
-              <button className="btn btn-solid" style={{ width: "100%", marginTop: 12 }} onClick={calculate}>
+              <button
+                className="btn btn-solid"
+                style={{ width: "100%", marginTop: 12 }}
+                onClick={calculate}
+              >
                 {L.calcSubmit}
               </button>
             </>
@@ -232,9 +308,10 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                 >
                   <div className="offer-media">
                     {o.product.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={o.product.image} alt="" />
                     ) : (
-                      <CoffinArt art={o.product.art} />
+                      <CoffinArt art={o.product.art} pet={o.product.pet} />
                     )}
                   </div>
                   <div>
@@ -243,11 +320,14 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                       {lang === "uk" ? o.product.material_uk : o.product.material_en}
                     </div>
                     <div className="offer-price">
-                      <span className="caps" style={{ color: o.exactFit ? "var(--gold)" : "var(--grey)" }}>
+                      <span
+                        className="caps"
+                        style={{ color: o.exactFit ? "var(--gold)" : "var(--grey)" }}
+                      >
                         {o.exactFit ? L.calcExact : L.calcCustom}
                       </span>
                       <span style={{ fontSize: 14 }}>
-                        {o.price.toLocaleString("uk-UA")} {L.uah}
+                        {money(o.price)} {L.uah}
                       </span>
                     </div>
                   </div>
@@ -278,16 +358,112 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                 {" · "}
                 {dims.length}×{dims.width}×{dims.height} см
                 {" · "}
-                {chosen.price.toLocaleString("uk-UA")} {L.uah}
+                {money(chosen.price)} {L.uah}
+              </div>
+
+              {/* гравіювання */}
+              {options.length > 0 && (
+                <div className="addons">
+                  <div className="addons-head">
+                    <span className="caps">{L.engravingTitle}</span>
+                    <span className="caps muted">{L.engravingSub}</span>
+                  </div>
+
+                  {options.map((o) => (
+                    <label
+                      key={o.id}
+                      className="addon"
+                      data-on={engIds.includes(o.id) ? "1" : undefined}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={engIds.includes(o.id)}
+                        onChange={() => toggleEng(o.id)}
+                      />
+                      <span className="addon-body">
+                        <span className="addon-name">
+                          {lang === "uk" ? o.label_uk : o.label_en}
+                        </span>
+                        <span className="addon-hint">
+                          {lang === "uk" ? o.hint_uk : o.hint_en}
+                        </span>
+                      </span>
+                      <span className="addon-price">
+                        +{money(o.price_uah)} {L.uah}
+                      </span>
+                    </label>
+                  ))}
+
+                  {needsText && (
+                    <div className="field" style={{ marginTop: 16, marginBottom: 4 }}>
+                      <label>{L.engravingTextLabel}</label>
+                      <textarea
+                        value={engText}
+                        placeholder={L.engravingTextPlaceholder}
+                        onChange={(e) => setEngText(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="totals">
+                <div>
+                  <span className="muted">{L.coffinLabel}</span>
+                  <span>
+                    {money(chosen.price)} {L.uah}
+                  </span>
+                </div>
+                {engPrice > 0 && (
+                  <div>
+                    <span className="muted">{L.engravingTitle}</span>
+                    <span>
+                      {money(engPrice)} {L.uah}
+                    </span>
+                  </div>
+                )}
+                <div className="totals-sum">
+                  <span>{L.totalLabel}</span>
+                  <span>
+                    {money(total)} {L.uah}
+                  </span>
+                </div>
+                <div className="caps muted totals-lead">
+                  {L.leadTitle}: {engIds.length ? L.leadEngraving : L.leadBase}
+                </div>
               </div>
 
               <div className="field-row">
-                <Field label={L.formFirstName} value={form.first_name} onChange={(v) => setForm({ ...form, first_name: v })} />
-                <Field label={L.formLastName} value={form.last_name} onChange={(v) => setForm({ ...form, last_name: v })} />
+                <Field
+                  label={L.formFirstName}
+                  value={form.first_name}
+                  onChange={(v) => setForm({ ...form, first_name: v })}
+                />
+                <Field
+                  label={L.formLastName}
+                  value={form.last_name}
+                  onChange={(v) => setForm({ ...form, last_name: v })}
+                />
               </div>
-              <Field label={L.formPhone} value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} type="tel" placeholder="+380" />
-              <Field label={L.formEmail} value={form.email} onChange={(v) => setForm({ ...form, email: v })} type="email" />
-              <Field label={L.formPostOffice} value={form.post_office} onChange={(v) => setForm({ ...form, post_office: v })} placeholder="Київ, №12" />
+              <Field
+                label={L.formPhone}
+                value={form.phone}
+                onChange={(v) => setForm({ ...form, phone: v })}
+                type="tel"
+                placeholder="+380"
+              />
+              <Field
+                label={L.formEmail}
+                value={form.email}
+                onChange={(v) => setForm({ ...form, email: v })}
+                type="email"
+              />
+              <Field
+                label={L.formPostOffice}
+                value={form.post_office}
+                onChange={(v) => setForm({ ...form, post_office: v })}
+                placeholder="Дніпро, №12"
+              />
 
               <div className="field">
                 <label>{L.formPayment}</label>
@@ -310,7 +486,12 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                 <button className="btn btn-sm" onClick={() => setStep(2)} disabled={sending}>
                   {L.calcBack}
                 </button>
-                <button className="btn btn-sm btn-solid" style={{ flex: 1 }} onClick={submit} disabled={sending}>
+                <button
+                  className="btn btn-sm btn-solid"
+                  style={{ flex: 1 }}
+                  onClick={submit}
+                  disabled={sending}
+                >
                   {sending ? L.formSending : L.formSubmit}
                 </button>
               </div>
@@ -318,7 +499,7 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
           )}
 
           {/* ─── КРОК 4 ─── */}
-          {step === 4 && (
+          {step === 4 && done && (
             <>
               <div className="done-check">
                 <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden>
@@ -328,12 +509,20 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
               <h3 className="display" style={{ fontSize: 30, margin: "0 0 14px" }}>
                 {L.doneTitle}
               </h3>
-              <p style={{ lineHeight: 1.85, color: "var(--ink-70)", margin: 0 }}>{L.doneText}</p>
+              <p style={{ lineHeight: 1.85, color: "var(--ink-70)", margin: 0 }}>
+                {L.doneText}
+              </p>
 
               <div className="result-box" style={{ marginTop: 26 }}>
                 <div className="caps muted">{L.doneNumber}</div>
                 <div className="display" style={{ fontSize: 30, marginTop: 6 }}>
-                  №{orderId}
+                  №{done.id}
+                </div>
+                <div className="caps muted" style={{ marginTop: 16 }}>
+                  {L.totalLabel}
+                </div>
+                <div className="display" style={{ fontSize: 24, marginTop: 4 }}>
+                  {money(done.total)} {L.uah}
                 </div>
               </div>
 
@@ -347,7 +536,15 @@ export default function CalculatorModal({ lang, products, preset, onClose }: Pro
                 </div>
               </div>
 
-              <button className="btn btn-solid" style={{ width: "100%", marginTop: 12 }} onClick={onClose}>
+              <div className="caps muted">
+                {L.leadTitle}: {engIds.length ? L.leadEngraving : L.leadBase}
+              </div>
+
+              <button
+                className="btn btn-solid"
+                style={{ width: "100%", marginTop: 20 }}
+                onClick={onClose}
+              >
                 {L.doneClose}
               </button>
             </>

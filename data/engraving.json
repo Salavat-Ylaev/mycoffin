@@ -1,0 +1,46 @@
+[
+  {
+    "id": "name",
+    "sort": 1,
+    "label_uk": "Ім'я улюбленця",
+    "label_en": "Pet's name",
+    "hint_uk": "Гравіювання на кришці",
+    "hint_en": "Engraved on the lid",
+    "price_uah": 250,
+    "needs_text": true,
+    "enabled": true
+  },
+  {
+    "id": "dates",
+    "sort": 2,
+    "label_uk": "Дати життя",
+    "label_en": "Dates of life",
+    "hint_uk": "Рік народження — рік прощання",
+    "hint_en": "Year of birth — year of farewell",
+    "price_uah": 250,
+    "needs_text": true,
+    "enabled": true
+  },
+  {
+    "id": "emblem",
+    "sort": 3,
+    "label_uk": "Емблема",
+    "label_en": "Emblem",
+    "hint_uk": "Лапка, серце, хрестик або свій знак",
+    "hint_en": "Paw, heart, cross or your own symbol",
+    "price_uah": 350,
+    "needs_text": false,
+    "enabled": true
+  },
+  {
+    "id": "verse",
+    "sort": 4,
+    "label_uk": "Посмертний вірш",
+    "label_en": "Epitaph",
+    "hint_uk": "Кілька рядків на ваш вибір або наш текст",
+    "hint_en": "A few lines of your choice, or ours",
+    "price_uah": 500,
+    "needs_text": true,
+    "enabled": true
+  }
+]

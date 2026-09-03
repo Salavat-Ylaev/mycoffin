@@ -1,8 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import type { ArtPattern, Order, PetKind, Product } from "@/lib/types";
+import type {
+  ArtPattern,
+  EngravingOption,
+  Order,
+  PetKind,
+  Product,
+} from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
+import { categoryById } from "@/lib/calc";
 import CoffinArt from "@/components/CoffinArt";
 
 const PET_LABEL: Record<PetKind, string> = {
@@ -21,19 +28,22 @@ const STATUS_LABEL: Record<Order["status"], string> = {
   cancelled: "Скасовано",
 };
 
+type Tab = "products" | "engraving" | "orders";
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [tab, setTab] = useState<"products" | "orders">("products");
+  const [tab, setTab] = useState<Tab>("products");
   const [pet, setPet] = useState<PetKind>("cat");
   const [products, setProducts] = useState<Product[]>([]);
+  const [engraving, setEngraving] = useState<EngravingOption[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [toast, setToast] = useState("");
 
   const flash = useCallback((msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(""), 2200);
+    setTimeout(() => setToast(""), 2400);
   }, []);
 
   const loadProducts = useCallback(async () => {
@@ -46,6 +56,11 @@ export default function AdminPage() {
     setAuthed(true);
   }, []);
 
+  const loadEngraving = useCallback(async () => {
+    const res = await fetch("/api/admin/engraving");
+    if (res.ok) setEngraving(await res.json());
+  }, []);
+
   const loadOrders = useCallback(async () => {
     const res = await fetch("/api/admin/orders");
     if (res.ok) setOrders(await res.json());
@@ -56,8 +71,10 @@ export default function AdminPage() {
   }, [loadProducts]);
 
   useEffect(() => {
-    if (authed && tab === "orders") loadOrders();
-  }, [authed, tab, loadOrders]);
+    if (!authed) return;
+    if (tab === "orders") loadOrders();
+    if (tab === "engraving") loadEngraving();
+  }, [authed, tab, loadOrders, loadEngraving]);
 
   const login = async (e: FormEvent) => {
     e.preventDefault();
@@ -80,6 +97,8 @@ export default function AdminPage() {
     setAuthed(false);
   };
 
+  /* ── товари ── */
+
   const save = async (p: Product) => {
     const res = await fetch("/api/admin/products", {
       method: "POST",
@@ -93,8 +112,7 @@ export default function AdminPage() {
   };
 
   const remove = async (p: Product) => {
-    const ok = window.confirm(`Видалити модель «${p.name_uk}» (${PET_LABEL[p.pet]})?`);
-    if (!ok) return;
+    if (!window.confirm(`Видалити модель «${p.name_uk}» (${PET_LABEL[p.pet]})?`)) return;
     await fetch(`/api/admin/products?id=${encodeURIComponent(p.id)}`, { method: "DELETE" });
     flash("Видалено");
     loadProducts();
@@ -139,6 +157,27 @@ export default function AdminPage() {
     flash("Фото завантажено — не забудьте «Зберегти»");
   };
 
+  /* ── гравіювання ── */
+
+  const patchEng = (id: string, key: keyof EngravingOption, value: unknown) =>
+    setEngraving((list) =>
+      list.map((o) => (o.id === id ? ({ ...o, [key]: value } as EngravingOption) : o))
+    );
+
+  const saveEng = async (o: EngravingOption) => {
+    const res = await fetch("/api/admin/engraving", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(o),
+    });
+    const data = await res.json();
+    if (!res.ok) return flash(data.error || "Помилка збереження");
+    flash(`Збережено: ${o.label_uk}`);
+    loadEngraving();
+  };
+
+  /* ── замовлення ── */
+
   const setStatus = async (id: string, status: Order["status"]) => {
     await fetch("/api/admin/orders", {
       method: "PATCH",
@@ -165,7 +204,10 @@ export default function AdminPage() {
           <div className="brand-word" style={{ textAlign: "center" }}>
             SPOKIY
           </div>
-          <div className="caps muted" style={{ textAlign: "center", marginTop: 10, marginBottom: 30 }}>
+          <div
+            className="caps muted"
+            style={{ textAlign: "center", marginTop: 10, marginBottom: 30 }}
+          >
             Панель керування
           </div>
           <div className="field">
@@ -215,11 +257,15 @@ export default function AdminPage() {
         <button className="tab" aria-selected={tab === "products"} onClick={() => setTab("products")}>
           Товари
         </button>
+        <button className="tab" aria-selected={tab === "engraving"} onClick={() => setTab("engraving")}>
+          Нанесення
+        </button>
         <button className="tab" aria-selected={tab === "orders"} onClick={() => setTab("orders")}>
           Замовлення
         </button>
       </div>
 
+      {/* ───────── товари ───────── */}
       {tab === "products" && (
         <>
           <div className="tabs" style={{ padding: "0 0 22px" }}>
@@ -241,7 +287,7 @@ export default function AdminPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.image} alt="" />
                   ) : (
-                    <CoffinArt art={p.art} />
+                    <CoffinArt art={p.art} pet={p.pet} />
                   )}
                 </div>
                 <label className="btn btn-sm" style={{ width: "100%", marginTop: 8 }}>
@@ -300,7 +346,11 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <Cell label="Посилання на фото (якщо не завантажували файл)" value={p.image} onChange={(v) => patch(p.id, "image", v)} />
+                <Cell
+                  label="Посилання на фото (якщо не завантажували файл)"
+                  value={p.image}
+                  onChange={(v) => patch(p.id, "image", v)}
+                />
 
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                   <button className="btn btn-sm btn-solid" onClick={() => save(p)}>
@@ -319,6 +369,65 @@ export default function AdminPage() {
         </>
       )}
 
+      {/* ───────── гравіювання ───────── */}
+      {tab === "engraving" && (
+        <>
+          <p className="muted" style={{ maxWidth: "62ch", marginTop: 0 }}>
+            Платні послуги, які клієнт відмічає галочкою при замовленні. Вимкнена послуга
+            зникає з сайту. Термін «+1–3 дні» показується автоматично, щойно обрано
+            хоч одну послугу.
+          </p>
+
+          {engraving
+            .slice()
+            .sort((a, b) => a.sort - b.sort)
+            .map((o) => (
+              <div key={o.id} className="admin-product" style={{ gridTemplateColumns: "1fr" }}>
+                <div>
+                  <div className="grid-2">
+                    <Cell label="Назва (укр)" value={o.label_uk} onChange={(v) => patchEng(o.id, "label_uk", v)} />
+                    <Cell label="Назва (англ)" value={o.label_en} onChange={(v) => patchEng(o.id, "label_en", v)} />
+                    <Cell label="Пояснення (укр)" value={o.hint_uk} onChange={(v) => patchEng(o.id, "hint_uk", v)} />
+                    <Cell label="Пояснення (англ)" value={o.hint_en} onChange={(v) => patchEng(o.id, "hint_en", v)} />
+                  </div>
+
+                  <div className="grid-4">
+                    <Cell label="Ціна, грн" type="number" value={o.price_uah} onChange={(v) => patchEng(o.id, "price_uah", Number(v))} />
+                    <Cell label="Порядок" type="number" value={o.sort} onChange={(v) => patchEng(o.id, "sort", Number(v))} />
+
+                    <div className="field" style={{ marginBottom: 12 }}>
+                      <label>Потрібен текст від клієнта</label>
+                      <select
+                        value={o.needs_text ? "1" : "0"}
+                        onChange={(e) => patchEng(o.id, "needs_text", e.target.value === "1")}
+                      >
+                        <option value="1">Так</option>
+                        <option value="0">Ні</option>
+                      </select>
+                    </div>
+
+                    <div className="field" style={{ marginBottom: 12 }}>
+                      <label>Показувати на сайті</label>
+                      <select
+                        value={o.enabled ? "1" : "0"}
+                        onChange={(e) => patchEng(o.id, "enabled", e.target.value === "1")}
+                      >
+                        <option value="1">Так</option>
+                        <option value="0">Ні</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button className="btn btn-sm btn-solid" onClick={() => saveEng(o)}>
+                    Зберегти
+                  </button>
+                </div>
+              </div>
+            ))}
+        </>
+      )}
+
+      {/* ───────── замовлення ───────── */}
       {tab === "orders" && (
         <div style={{ overflowX: "auto" }}>
           {orders.length === 0 && <div className="caps muted">Замовлень поки немає</div>}
@@ -334,49 +443,65 @@ export default function AdminPage() {
                   <th>Тварина</th>
                   <th>Модель</th>
                   <th>Розмір</th>
-                  <th>Ціна</th>
+                  <th>Нанесення</th>
+                  <th>Разом</th>
                   <th>Відділення</th>
                   <th>Статус</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => (
-                  <tr key={o.id}>
-                    <td>
-                      <span className="dot" />
-                      {o.id}
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>
-                      {new Date(o.created_at).toLocaleString("uk-UA")}
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>
-                      {o.last_name} {o.first_name}
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>{o.phone}</td>
-                    <td>{o.email}</td>
-                    <td>
-                      {PET_LABEL[o.pet]}, {o.weight_kg} кг
-                    </td>
-                    <td>{o.item.product_name}</td>
-                    <td style={{ whiteSpace: "nowrap" }}>
-                      {o.item.length_cm}×{o.item.width_cm}×{o.item.height_cm}
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>{o.item.price_uah} грн</td>
-                    <td>{o.post_office}</td>
-                    <td>
-                      <select
-                        value={o.status}
-                        onChange={(e) => setStatus(o.id, e.target.value as Order["status"])}
-                      >
-                        {(Object.keys(STATUS_LABEL) as Order["status"][]).map((s) => (
-                          <option key={s} value={s}>
-                            {STATUS_LABEL[s]}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))}
+                {orders.map((o) => {
+                  const cat = categoryById(o.category_id);
+                  const eng = o.engraving;
+                  return (
+                    <tr key={o.id}>
+                      <td>
+                        <span className="dot" />
+                        {o.id}
+                      </td>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        {new Date(o.created_at).toLocaleString("uk-UA")}
+                      </td>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        {o.last_name} {o.first_name}
+                      </td>
+                      <td style={{ whiteSpace: "nowrap" }}>{o.phone}</td>
+                      <td>{o.email}</td>
+                      <td>
+                        {PET_LABEL[o.pet]}, {o.weight_kg} кг
+                        {cat && <div className="muted">{cat.label_uk}</div>}
+                      </td>
+                      <td>{o.item.product_name}</td>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        {o.item.length_cm}×{o.item.width_cm}×{o.item.height_cm}
+                      </td>
+                      <td>
+                        {eng && eng.ids.length ? (
+                          <>
+                            {eng.labels.join(", ")}
+                            {eng.text && <div className="muted">«{eng.text}»</div>}
+                          </>
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
+                      <td style={{ whiteSpace: "nowrap" }}>{o.total_uah} грн</td>
+                      <td>{o.post_office}</td>
+                      <td>
+                        <select
+                          value={o.status}
+                          onChange={(e) => setStatus(o.id, e.target.value as Order["status"])}
+                        >
+                          {(Object.keys(STATUS_LABEL) as Order["status"][]).map((s) => (
+                            <option key={s} value={s}>
+                              {STATUS_LABEL[s]}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -384,7 +509,6 @@ export default function AdminPage() {
       )}
 
       {toast && <div className="toast">{toast}</div>}
-
     </div>
   );
 }
