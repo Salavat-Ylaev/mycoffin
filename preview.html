@@ -1,0 +1,836 @@
+<title>SPOKIY</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
+
+<style>
+/* ============================================================
+   SPOKIY — прев'ю дизайну.
+   Свідомо однотемна сторінка: біло-чорно-золота палітра — це і є
+   айдентика бренду, тому кольори задані явно й не залежать від теми.
+   ============================================================ */
+
+:root{
+  color-scheme: light;
+  --paper:#fbfaf8;
+  --paper-2:#f2f0ed;
+  --ink:#0a0a0a;
+  --ink-70:#4a4a4a;
+  --grey:#8a8a8a;
+  --line:#e3e1de;
+  --gold:#b2954f;
+  --gold-soft:#d8c48c;
+
+  --ui:"Commissioner","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --display:"Cormorant Garamond","Times New Roman",Times,Georgia,serif;
+
+  --pad:clamp(16px,4vw,56px);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--ui);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+img{max-width:100%;display:block}
+::selection{background:var(--gold-soft);color:var(--ink)}
+:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+
+.caps{text-transform:uppercase;letter-spacing:.22em;font-size:10px;line-height:1.4}
+.caps-lg{text-transform:uppercase;letter-spacing:.3em;font-size:12px}
+.display{font-family:var(--display);font-weight:400;line-height:1.05}
+.muted{color:var(--grey)}
+.gold{color:var(--gold)}
+
+/* демо-смуга */
+.demo-bar{
+  background:var(--ink);color:var(--paper);
+  padding:9px var(--pad);
+  display:flex;gap:14px;align-items:center;justify-content:center;
+  text-align:center;flex-wrap:wrap;
+}
+.demo-bar b{color:var(--gold-soft);font-weight:500}
+
+/* кнопки */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:42px;padding:0 22px;border:1px solid var(--ink);background:transparent;
+  text-transform:uppercase;letter-spacing:.18em;font-size:10px;white-space:nowrap;
+  transition:background .22s ease,color .22s ease,border-color .22s ease;
+}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn-solid{background:var(--ink);color:var(--paper)}
+.btn-solid:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.btn-sm{height:34px;padding:0 16px;font-size:9px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* шапка */
+.header{position:sticky;top:0;z-index:60;background:rgba(251,250,248,.93);
+  backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--line)}
+.header-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  gap:16px;padding:0 var(--pad);height:clamp(74px,9vw,96px)}
+.header-nav{display:flex;gap:26px;align-items:center}
+.header-actions{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.brand{text-align:center;line-height:1}
+.brand-word{font-family:var(--display);font-size:clamp(19px,2.6vw,28px);
+  letter-spacing:.4em;text-indent:.4em;font-weight:500}
+.brand-sub{margin-top:7px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey)}
+.lang-toggle{border:1px solid var(--line);height:30px;min-width:46px;padding:0 10px;
+  font-size:10px;letter-spacing:.16em;transition:border-color .2s,color .2s}
+.lang-toggle:hover{border-color:var(--ink);color:var(--gold)}
+.header-mobile-cta{display:none}
+
+/* перший екран */
+.hero{padding:clamp(64px,11vw,140px) var(--pad) clamp(48px,8vw,92px);
+  display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(30px,6vw,90px);
+  align-items:end;border-bottom:1px solid var(--line)}
+.hero h1{margin:0;font-size:clamp(40px,7.2vw,96px);text-wrap:balance}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-side{padding-bottom:10px}
+.hero-rule{width:54px;height:1px;background:var(--gold);margin:0 0 22px}
+.hero-text{font-size:14px;line-height:1.85;color:var(--ink-70);max-width:42ch}
+
+/* блок підтримки */
+.comfort{padding:clamp(52px,9vw,110px) var(--pad);display:grid;
+  grid-template-columns:220px 1fr;gap:clamp(24px,5vw,64px);
+  border-bottom:1px solid var(--line);background:var(--paper-2)}
+.comfort-body{max-width:70ch}
+.comfort-body p{margin:0;font-family:var(--display);
+  font-size:clamp(20px,2.4vw,29px);line-height:1.6}
+.comfort-sign{margin-top:26px;color:var(--grey)}
+
+/* каталог */
+.catalog{padding:clamp(52px,9vw,100px) 0 clamp(44px,8vw,88px);border-bottom:1px solid var(--line)}
+.catalog-head{padding:0 var(--pad);display:flex;align-items:baseline;
+  justify-content:space-between;gap:20px;flex-wrap:wrap}
+.catalog-title{margin:0;font-size:clamp(28px,4.4vw,52px)}
+.tabs{display:flex;gap:4px;padding:28px var(--pad) 0;flex-wrap:wrap}
+.tab{padding:9px 18px;border:1px solid var(--line);text-transform:uppercase;
+  letter-spacing:.18em;font-size:10px;color:var(--grey);transition:all .2s ease}
+.tab:hover{color:var(--ink);border-color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(252px,25vw);gap:1px;
+  overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:var(--pad);
+  padding:0 var(--pad);margin-top:30px;scrollbar-width:none;background:var(--line);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.rail::-webkit-scrollbar{display:none}
+.card{scroll-snap-align:start;background:var(--paper);padding:22px 22px 26px;
+  display:flex;flex-direction:column}
+.card-media{position:relative;aspect-ratio:4/5;background:var(--paper-2);
+  overflow:hidden;margin-bottom:18px}
+.card-media svg{width:100%;height:100%;display:block}
+.card-badge{position:absolute;top:12px;left:12px;background:var(--paper);
+  padding:5px 9px;border:1px solid var(--line)}
+.card-badge.out{color:var(--grey)}
+.card-name{font-family:var(--display);font-size:21px;font-weight:400;margin:0 0 6px}
+.card-material{color:var(--grey);font-size:12px;line-height:1.6;margin-bottom:12px}
+.card-meta{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.card-price{font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.card-price small{color:var(--grey);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;margin-right:5px}
+.card-cta{margin-top:16px}
+.rail-nav{display:flex;gap:8px;padding:22px var(--pad) 0;justify-content:flex-end}
+.rail-btn{width:40px;height:40px;border:1px solid var(--line);display:grid;
+  place-items:center;transition:all .2s}
+.rail-btn:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+
+/* як ми працюємо */
+.steps{padding:clamp(52px,9vw,100px) var(--pad);display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:clamp(26px,4vw,60px);
+  border-bottom:1px solid var(--line)}
+.step-num{color:var(--gold);margin-bottom:14px;font-variant-numeric:tabular-nums}
+.step h3{font-family:var(--display);font-size:22px;font-weight:400;margin:0 0 10px}
+.step p{margin:0;color:var(--ink-70);line-height:1.8;max-width:34ch}
+
+.footer{padding:clamp(38px,6vw,70px) var(--pad) 44px;display:grid;
+  grid-template-columns:1fr auto;gap:26px;align-items:end}
+.footer-links{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+
+/* модальні */
+.overlay{position:fixed;inset:0;z-index:90;background:rgba(10,10,10,.42);
+  backdrop-filter:blur(3px);display:flex;justify-content:flex-end;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--paper);width:min(560px,100%);height:100%;overflow-y:auto;
+  animation:slide .32s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column}
+@keyframes slide{from{transform:translateX(28px);opacity:.4}}
+.modal-head{position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);
+  padding:22px clamp(20px,4vw,38px);display:flex;align-items:center;
+  justify-content:space-between;gap:16px;z-index:2}
+.modal-body{padding:clamp(24px,4vw,38px);flex:1}
+.modal-close{width:34px;height:34px;border:1px solid var(--line);display:grid;
+  place-items:center;transition:all .2s;flex:none}
+.modal-close:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.steps-bar{display:flex;gap:6px;margin-bottom:30px}
+.steps-bar span{flex:1;height:2px;background:var(--line)}
+.steps-bar span.on{background:var(--gold)}
+
+/* форми */
+.field{margin-bottom:20px}
+.field label{display:block;text-transform:uppercase;letter-spacing:.18em;
+  font-size:9px;color:var(--grey);margin-bottom:8px}
+.field input,.field select,.field textarea{width:100%;border:none;
+  border-bottom:1px solid var(--ink);background:transparent;padding:9px 0;
+  font-family:var(--ui);font-size:14px;color:var(--ink);border-radius:0;appearance:none}
+.field textarea{border:1px solid var(--line);padding:12px;min-height:88px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.pet-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pet-option{border:1px solid var(--line);padding:16px 14px;text-align:left;
+  transition:all .2s;display:flex;align-items:center;gap:12px}
+.pet-option:hover{border-color:var(--ink)}
+.pet-option[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.pet-glyph{font-size:20px;line-height:1}
+
+.result-box{border:1px solid var(--ink);padding:22px;margin-bottom:28px}
+.result-dims{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.result-dims div{border-left:1px solid var(--line);padding-left:12px}
+.result-dims strong{display:block;font-family:var(--display);font-size:28px;
+  font-weight:400;margin-top:4px;font-variant-numeric:tabular-nums}
+
+.offer{display:grid;grid-template-columns:92px 1fr;gap:16px;border:1px solid var(--line);
+  padding:14px;margin-bottom:10px;text-align:left;width:100%;align-items:start;
+  transition:border-color .2s}
+.offer:hover{border-color:var(--ink)}
+.offer[aria-pressed="true"]{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.offer-media{aspect-ratio:4/5;background:var(--paper-2);overflow:hidden}
+.offer-media svg{width:100%;height:100%}
+.offer h4{margin:0 0 4px;font-family:var(--display);font-size:18px;font-weight:400}
+.offer-price{margin-top:10px;display:flex;align-items:baseline;
+  justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+
+.notice{border-left:2px solid var(--gold);background:var(--paper-2);padding:14px 16px;
+  font-size:13px;line-height:1.7;margin:18px 0}
+.error{color:#9c2b2b;font-size:12px;margin-top:12px}
+.done-check{width:46px;height:46px;border:1px solid var(--gold);color:var(--gold);
+  display:grid;place-items:center;margin-bottom:24px}
+
+@media (max-width:900px){
+  .header-nav{display:none}
+  .hero,.comfort,.footer{grid-template-columns:1fr}
+  .hero{align-items:start}
+  .header-actions .btn-desktop{display:none}
+  .header-mobile-cta{display:flex;gap:8px;padding:0 var(--pad) 14px}
+  .header-mobile-cta .btn{flex:1}
+  .rail{grid-auto-columns:minmax(230px,74vw)}
+}
+@media (max-width:560px){
+  .field-row,.pet-picker{grid-template-columns:1fr}
+  .offer{grid-template-columns:72px 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="demo-bar caps" id="demoBar">
+  <span>Прев'ю дизайну · <b>калькулятор і каталог працюють</b> · замовлення не надсилається</span>
+</div>
+
+<div id="app"></div>
+
+<script>
+/* ─────────────────────── дані каталогу ─────────────────────── */
+
+const MODELS = [
+  {key:"classic",art:"classic",uk:"Класик",en:"Classic",
+   muk:"Дуб, лак, фурнітура під золото",men:"Oak, lacquer, gold-finished hardware",
+   duk:"Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
+   den:"A classic silhouette in warm wood, lined with soft ivory cloth."},
+  {key:"minimal",art:"minimal",uk:"Мінімал",en:"Minimal",
+   muk:"МДФ, матова біла емаль",men:"MDF, matte white enamel",
+   duk:"Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
+   den:"Clean lines, no ornament. Matte white surface, concealed hardware."},
+  {key:"noir",art:"noir",uk:"Ноар",en:"Noir",
+   muk:"Ясен, чорна матова емаль",men:"Ash, matte black enamel",
+   duk:"Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
+   den:"A deep black body with a thin gold rule around the lid."},
+  {key:"goldline",art:"goldline",uk:"Голд Лайн",en:"Gold Line",
+   muk:"Біла емаль, золоте гравіювання",men:"White enamel, gold engraving",
+   duk:"Біла емаль із гравіюванням імені та дат сусальним золотом.",
+   den:"White enamel with the name and dates engraved in gold leaf."},
+  {key:"eco",art:"eco",uk:"Еко",en:"Eco",
+   muk:"Березова фанера, льон, без лаку",men:"Birch plywood, linen, unlacquered",
+   duk:"Біорозкладна модель для поховання в землю. Натуральні матеріали.",
+   den:"A biodegradable model for burial. Natural materials only."}
+];
+
+const PETS = {
+  cat:{base:48,v:{classic:[34,70,3200,55],minimal:[34,70,2400,42],noir:[38,70,3600,60],goldline:[34,66,4200,70],eco:[34,70,1800,32]}},
+  dog:{base:70,v:{classic:[32,120,5200,60],minimal:[32,120,4100,48],noir:[40,130,5900,66],goldline:[32,110,6800,78],eco:[32,120,3200,36]}},
+  reptile:{base:45,v:{classic:[24,100,2600,48],minimal:[24,100,2000,38],noir:[24,110,2900,52],goldline:[24,90,3400,62],eco:[24,100,1500,28]}},
+  rodent:{base:24,v:{classic:[18,40,1600,40],minimal:[18,40,1200,32],noir:[18,40,1800,45],goldline:[18,36,2200,55],eco:[18,40,900,22]}}
+};
+
+const PRODUCTS = [];
+for (const pet of Object.keys(PETS)) {
+  MODELS.forEach((m, i) => {
+    const [min, max, base, perCm] = PETS[pet].v[m.key];
+    PRODUCTS.push({
+      id: pet + "-" + m.key, pet, sort: i + 1, art: m.art,
+      name_uk: m.uk, name_en: m.en, material_uk: m.muk, material_en: m.men,
+      desc_uk: m.duk, desc_en: m.den,
+      min_length_cm: min, max_length_cm: max,
+      base_price_uah: base, base_length_cm: PETS[pet].base, price_per_cm_uah: perCm,
+      in_stock: !(pet === "dog" && m.key === "goldline")
+    });
+  });
+}
+
+/* ─────────────────────── розрахунок ─────────────────────── */
+
+const SHAPES = {
+  cat:{k:28.5,w:.42,h:.34,margin:.14,min:[34,18,15],weight:[.3,15],def:4.5},
+  dog:{k:26,w:.44,h:.38,margin:.14,min:[32,18,15],weight:[.5,90],def:12},
+  reptile:{k:41,w:.26,h:.2,margin:.12,min:[24,12,9],weight:[.05,40],def:1.2},
+  rodent:{k:23,w:.46,h:.38,margin:.16,min:[18,11,9],weight:[.02,12],def:.35}
+};
+
+const roundUp = (n, step) => Math.ceil(n / step) * step;
+
+function calcDimensions(pet, kg) {
+  const s = SHAPES[pet];
+  const w = Math.min(Math.max(kg, s.weight[0]), s.weight[1]);
+  const body = s.k * Math.cbrt(w);
+  const length = roundUp(Math.max(body * (1 + s.margin), s.min[0]), 2);
+  const width  = roundUp(Math.max(length * s.w, s.min[1]), 1);
+  const height = roundUp(Math.max(length * s.h, s.min[2]), 1);
+  return { length, width, height };
+}
+
+function priceFor(p, length) {
+  const raw = p.base_price_uah + (length - p.base_length_cm) * p.price_per_cm_uah;
+  return Math.max(Math.round(raw / 50) * 50, Math.round(p.base_price_uah * .6));
+}
+
+function pickOffers(pet, dims, limit) {
+  const pool = PRODUCTS.filter(p => p.pet === pet && p.in_stock).sort((a,b) => a.sort - b.sort);
+  const fits = pool.filter(p => dims.length >= p.min_length_cm && dims.length <= p.max_length_cm);
+  const dist = p => dims.length < p.min_length_cm ? p.min_length_cm - dims.length
+                  : dims.length > p.max_length_cm ? dims.length - p.max_length_cm : 0;
+  const rest = pool.filter(p => !fits.includes(p)).sort((a,b) => dist(a) - dist(b));
+  return [...fits, ...rest].slice(0, Math.max(limit, 2))
+    .map(p => ({ product: p, price: priceFor(p, dims.length), exactFit: fits.includes(p) }));
+}
+
+/* ─────────────────────── тексти ─────────────────────── */
+
+const DICT = {
+  uk:{brandSub:"труни для улюбленців · на замовлення",navCatalog:"Каталог",navCare:"Як ми працюємо",
+    ctaWrite:"Написати нам",ctaCalc:"Прорахувати труну",langLabel:"EN",
+    heroLine1:"Гідне прощання",heroLine2:"для того, хто був родиною",
+    heroText:"Труни ручної роботи для котів, собак, рептилій і гризунів. Кожна — під розмір вашого улюбленця, з дерева, тканини та спокійних ліній.",
+    heroScroll:"Каталог",comfortTitle:"Ми поруч",
+    comfortText:"Втрата улюбленця — це справжнє горе, і воно не потребує виправдань. Ви не мусите зараз думати про деталі: ми візьмемо це на себе. Кожну труну ми робимо так, ніби прощаємося зі своїм — з увагою до кожного сантиметра, до текстури дерева, до тиші, яка має бути навколо. Обіцяємо: буде зроблено в найкращому вигляді. Ваш улюбленець заслуговує на гідне прощання, і ми про це подбаємо.",
+    comfortSign:"Майстерня SPOKIY",catalogTitle:"Каталог",catalogHint:"Гортайте вбік",
+    petCat:"Кіт",petDog:"Пес",petReptile:"Рептилія",petRodent:"Гризун",
+    inStock:"В наявності",outStock:"Під замовлення",fromPrice:"від",uah:"грн",
+    sizeRange:"Довжина",orderThis:"Обрати цю модель",calcTitle:"Прорахувати труну",
+    step1:"Крок 1 · Ваш улюбленець",step2:"Крок 2 · Варіанти",step3:"Крок 3 · Замовлення",step4:"Готово",
+    calcPetLabel:"Тип тварини",calcWeightLabel:"Приблизна вага, кг",
+    calcWeightHint:"Точність до кілограма не потрібна — ми уточнимо при підтвердженні.",
+    calcSubmit:"Розрахувати розмір",calcResultTitle:"Рекомендований внутрішній розмір",
+    calcLength:"Довжина",calcWidth:"Ширина",calcHeight:"Висота",cm:"см",
+    calcOffersTitle:"Відповідні моделі",calcExact:"Стандартний розмір",calcCustom:"Виготовимо індивідуально",
+    back:"Назад",choose:"Обрати",formFirstName:"Ім'я",formLastName:"Прізвище",formPhone:"Телефон",
+    formEmail:"E-mail для підтвердження",formPostOffice:"Відділення пошти (місто, №)",
+    formPayment:"Спосіб оплати",formPaymentTransfer:"Переказ на реквізити",
+    formComment:"Коментар (необов'язково)",formSubmit:"Підтвердити замовлення",
+    formRequired:"Заповніть обов'язкові поля",formPhoneInvalid:"Перевірте номер телефону",
+    formEmailInvalid:"Перевірте e-mail",doneTitle:"Замовлення прийнято",
+    doneText:"Ми зв'яжемося з вами найближчим часом, щоб підтвердити розмір і терміни. Підтвердження надіслано на вашу пошту.",
+    doneNumber:"Номер замовлення",donePayTitle:"Реквізити для переказу",
+    donePayHint:"Оплату вносьте після дзвінка менеджера — ми спершу підтвердимо розмір і вартість.",
+    doneClose:"Закрити",demoNote:"Це прев'ю: на справжньому сайті цей крок надсилає замовлення вам у Telegram і на пошту, а клієнту — лист-підтвердження.",
+    contactTitle:"Написати нам",contactText:"Зателефонуйте або напишіть — ми відповідаємо швидко і без зайвих слів.",
+    contactPhone:"Телефон",contactEmail:"Пошта",
+    care1:"Замір і розрахунок",care1t:"Ви вказуєте тип тварини та приблизну вагу — ми рахуємо внутрішній розмір.",
+    care2:"Виготовлення",care2t:"1–3 дні. Дерево, натуральна тканина, фурнітура з покриттям під золото.",
+    care3:"Доставка",care3t:"Відправка на відділення пошти по всій Україні. Пакування без маркувань.",
+    rights:"Усі права захищені"},
+
+  en:{brandSub:"pet caskets · made to order",navCatalog:"Catalogue",navCare:"How we work",
+    ctaWrite:"Write to us",ctaCalc:"Size my casket",langLabel:"UA",
+    heroLine1:"A dignified farewell",heroLine2:"for the one who was family",
+    heroText:"Handmade caskets for cats, dogs, reptiles and rodents. Each one built to your companion's size — in wood, cloth and quiet lines.",
+    heroScroll:"Catalogue",comfortTitle:"We are here",
+    comfortText:"Losing a companion is real grief, and it needs no justification. You don't have to think about the details right now — we'll carry that part. Every casket is made the way we would make it for our own: attentive to each centimetre, to the grain of the wood, to the quiet that should surround it. We promise it will be done beautifully. Your companion deserves a dignified farewell, and we will take care of it.",
+    comfortSign:"SPOKIY workshop",catalogTitle:"Catalogue",catalogHint:"Scroll sideways",
+    petCat:"Cat",petDog:"Dog",petReptile:"Reptile",petRodent:"Rodent",
+    inStock:"In stock",outStock:"Made to order",fromPrice:"from",uah:"UAH",
+    sizeRange:"Length",orderThis:"Choose this model",calcTitle:"Size my casket",
+    step1:"Step 1 · Your companion",step2:"Step 2 · Options",step3:"Step 3 · Order",step4:"Done",
+    calcPetLabel:"Animal type",calcWeightLabel:"Approximate weight, kg",
+    calcWeightHint:"No need to be exact — we'll confirm when we call you.",
+    calcSubmit:"Calculate the size",calcResultTitle:"Recommended internal size",
+    calcLength:"Length",calcWidth:"Width",calcHeight:"Height",cm:"cm",
+    calcOffersTitle:"Matching models",calcExact:"Standard size",calcCustom:"Custom build",
+    back:"Back",choose:"Choose",formFirstName:"First name",formLastName:"Last name",formPhone:"Phone",
+    formEmail:"E-mail for confirmation",formPostOffice:"Post office (city, number)",
+    formPayment:"Payment method",formPaymentTransfer:"Bank transfer",
+    formComment:"Comment (optional)",formSubmit:"Confirm the order",
+    formRequired:"Please fill in the required fields",formPhoneInvalid:"Check the phone number",
+    formEmailInvalid:"Check the e-mail",doneTitle:"Order received",
+    doneText:"We'll contact you shortly to confirm the size and the timing. A confirmation has been sent to your e-mail.",
+    doneNumber:"Order number",donePayTitle:"Transfer details",
+    donePayHint:"Please pay after our call — we confirm the size and the final price first.",
+    doneClose:"Close",demoNote:"This is a preview: on the live site this step sends the order to your Telegram and inbox, and a confirmation e-mail to the customer.",
+    contactTitle:"Write to us",contactText:"Call or message us — we reply quickly and without small talk.",
+    contactPhone:"Phone",contactEmail:"E-mail",
+    care1:"Measure and quote",care1t:"You give the animal type and approximate weight — we calculate the internal size.",
+    care2:"Craft",care2t:"1–3 days. Wood, natural cloth, gold-finished hardware.",
+    care3:"Delivery",care3t:"Shipped to any post office in Ukraine. Unmarked packaging.",
+    rights:"All rights reserved"}
+};
+
+const PET_KINDS = ["cat","dog","reptile","rodent"];
+const GLYPH = {cat:"🐈",dog:"🐕",reptile:"🦎",rodent:"🐹"};
+const PAY_DETAILS = "ФОП Челідзе В. / IBAN UA00 0000 0000 0000 0000 0000 000";
+const PHONE = "+380 67 000 00 00";
+const EMAIL = "hello@spokiy.ua";
+
+/* ─────────────────────── ілюстрації ─────────────────────── */
+
+const OUTER = "170,44 230,44 276,150 252,458 148,458 124,150";
+const INNER = "174,54 226,54 267,152 244,448 156,448 133,152";
+const THEME = {
+  classic:{bg:"#f2f0ed",body:"#c9b18b",stroke:"#8d7550",detail:"#a98f66",hw:"#b2954f"},
+  minimal:{bg:"#f2f0ed",body:"#fdfdfc",stroke:"#c9c6c1",detail:"#e3e1de",hw:"#b9b6b1"},
+  noir:{bg:"#e8e6e3",body:"#151514",stroke:"#000000",detail:"#2c2c2a",hw:"#b2954f"},
+  goldline:{bg:"#f2f0ed",body:"#fbfaf8",stroke:"#d8d4ce",detail:"#b2954f",hw:"#b2954f"},
+  eco:{bg:"#efece6",body:"#e0cfae",stroke:"#b39c74",detail:"#c9b48c",hw:"#9c8560"}
+};
+
+function coffinSvg(art) {
+  const c = THEME[art] || THEME.minimal;
+  let extra = "";
+
+  if (art === "classic") {
+    extra = [80,118,200,262,324,386]
+      .map(y => `<line x1="140" y1="${y}" x2="260" y2="${y}" stroke="${c.detail}" stroke-width="0.9" opacity="0.6"/>`).join("");
+  } else if (art === "noir") {
+    extra = `<polygon points="180,66 220,66 254,152 236,436 164,436 146,152" fill="none" stroke="${c.hw}" stroke-width="1" opacity="0.85"/>`;
+  } else if (art === "goldline") {
+    extra = `<g fill="none" stroke="${c.hw}">
+      <polygon points="182,68 218,68 252,152 235,434 165,434 148,152" stroke-width="0.8"/>
+      <circle cx="200" cy="215" r="26" stroke-width="0.8"/>
+      <line x1="168" y1="300" x2="232" y2="300" stroke-width="0.7"/>
+      <line x1="176" y1="318" x2="224" y2="318" stroke-width="0.7"/>
+    </g><path d="M200 200 l7 12 -7 12 -7 -12 z" fill="${c.hw}"/>`;
+  } else if (art === "eco") {
+    extra = Array.from({length:19}, (_,i) => 70 + i*20)
+      .map(y => `<line x1="132" y1="${y}" x2="268" y2="${y}" stroke="${c.stroke}" stroke-width="0.6" opacity="0.45"/>`).join("");
+  } else {
+    extra = `<line x1="150" y1="250" x2="250" y2="250" stroke="${c.detail}" stroke-width="1"/>`;
+  }
+
+  const hardware = ["classic","noir","goldline"].includes(art)
+    ? `<g fill="none" stroke="${c.hw}" stroke-width="2.2" stroke-linecap="round">
+         <path d="M132 210 q-12 12 0 24"/><path d="M268 210 q12 12 0 24"/>
+         <path d="M138 350 q-12 12 0 24"/><path d="M262 350 q12 12 0 24"/>
+       </g>` : "";
+
+  return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="400" height="500" fill="${c.bg}"/>
+    <polygon points="${OUTER}" fill="#000" opacity="0.05" transform="translate(6 8)"/>
+    <polygon points="${OUTER}" fill="${c.body}" stroke="${c.stroke}" stroke-width="1.5"/>
+    <polygon points="${INNER}" fill="none" stroke="${c.stroke}" stroke-width="0.8" opacity="0.55"/>
+    <line x1="200" y1="54" x2="200" y2="448" stroke="${c.stroke}" stroke-width="0.7" opacity="0.4"/>
+    ${extra}${hardware}
+  </svg>`;
+}
+
+/* ─────────────────────── стан і рендер ─────────────────────── */
+
+const state = {
+  lang: "uk",
+  pet: "cat",
+  modal: null,          // null | "calc" | "contact"
+  step: 1,
+  calcPet: "cat",
+  weight: SHAPES.cat.def,
+  dims: null,
+  offers: [],
+  chosenId: null,
+  presetId: null,
+  form: {first_name:"",last_name:"",phone:"",email:"",post_office:"",comment:""},
+  error: "",
+  orderId: ""
+};
+
+const esc = s => String(s).replace(/[<>&"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+const L = () => DICT[state.lang];
+const money = n => n.toLocaleString("uk-UA");
+const petLabel = p => ({cat:L().petCat,dog:L().petDog,reptile:L().petReptile,rodent:L().petRodent})[p];
+const nameOf = p => state.lang === "uk" ? p.name_uk : p.name_en;
+const matOf  = p => state.lang === "uk" ? p.material_uk : p.material_en;
+const descOf = p => state.lang === "uk" ? p.desc_uk : p.desc_en;
+
+function render() {
+  const d = L();
+  const list = PRODUCTS.filter(p => p.pet === state.pet).sort((a,b) => a.sort - b.sort);
+
+  document.getElementById("app").innerHTML = `
+    <header class="header">
+      <div class="header-inner">
+        <nav class="header-nav caps">
+          <a href="#catalog">${d.navCatalog}</a>
+          <a href="#care">${d.navCare}</a>
+        </nav>
+        <a href="#top" class="brand">
+          <div class="brand-word">SPOKIY</div>
+          <div class="brand-sub">${d.brandSub}</div>
+        </a>
+        <div class="header-actions">
+          <button class="btn btn-sm btn-desktop" data-act="contact">${d.ctaWrite}</button>
+          <button class="btn btn-sm btn-solid btn-desktop" data-act="calc">${d.ctaCalc}</button>
+          <button class="lang-toggle caps" data-act="lang">${d.langLabel}</button>
+        </div>
+      </div>
+      <div class="header-mobile-cta">
+        <button class="btn btn-sm" data-act="contact">${d.ctaWrite}</button>
+        <button class="btn btn-sm btn-solid" data-act="calc">${d.ctaCalc}</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <h1 class="display">${d.heroLine1}<br><em>${d.heroLine2}</em></h1>
+        <div class="hero-side">
+          <div class="hero-rule"></div>
+          <p class="hero-text">${d.heroText}</p>
+          <a href="#catalog" class="btn btn-sm" style="margin-top:26px">${d.heroScroll}</a>
+        </div>
+      </section>
+
+      <section class="comfort">
+        <div class="caps gold">${d.comfortTitle}</div>
+        <div class="comfort-body">
+          <p>${d.comfortText}</p>
+          <div class="comfort-sign caps">${d.comfortSign}</div>
+        </div>
+      </section>
+
+      <section class="catalog" id="catalog">
+        <div class="catalog-head">
+          <h2 class="catalog-title display">${d.catalogTitle}</h2>
+          <span class="caps muted">${d.catalogHint}</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          ${PET_KINDS.map(p => `<button role="tab" class="tab" aria-selected="${p === state.pet}" data-pet="${p}">${petLabel(p)}</button>`).join("")}
+        </div>
+
+        <div class="rail" id="rail">
+          ${list.map(p => `
+            <article class="card">
+              <div class="card-media">
+                ${coffinSvg(p.art)}
+                <span class="card-badge caps ${p.in_stock ? "" : "out"}">${p.in_stock ? d.inStock : d.outStock}</span>
+              </div>
+              <h3 class="card-name">${esc(nameOf(p))}</h3>
+              <div class="card-material">${esc(matOf(p))}</div>
+              <div class="card-material" style="margin-top:-6px">${esc(descOf(p))}</div>
+              <div class="card-meta">
+                <span class="caps muted">${d.sizeRange} ${p.min_length_cm}–${p.max_length_cm} ${d.cm}</span>
+                <span class="card-price"><small>${d.fromPrice}</small>${money(priceFor(p, p.min_length_cm))} ${d.uah}</span>
+              </div>
+              <button class="btn btn-sm card-cta" data-act="calc" data-product="${p.id}" data-petkind="${p.pet}">${d.orderThis}</button>
+            </article>`).join("")}
+        </div>
+
+        <div class="rail-nav">
+          <button class="rail-btn" data-scroll="-1" aria-label="←">${arrow("left")}</button>
+          <button class="rail-btn" data-scroll="1" aria-label="→">${arrow("right")}</button>
+        </div>
+      </section>
+
+      <section class="steps" id="care">
+        ${[[d.care1,d.care1t],[d.care2,d.care2t],[d.care3,d.care3t]].map(([t,x],i) => `
+          <div class="step">
+            <div class="step-num caps">0${i+1}</div>
+            <h3>${t}</h3>
+            <p>${x}</p>
+          </div>`).join("")}
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <div class="brand-word" style="text-align:left">SPOKIY</div>
+        <div class="brand-sub" style="letter-spacing:.18em">${d.brandSub}</div>
+      </div>
+      <div class="footer-links caps">
+        <button data-act="contact">${d.ctaWrite}</button>
+        <button data-act="calc">${d.ctaCalc}</button>
+        <span class="muted">© 2026 SPOKIY. ${d.rights}</span>
+      </div>
+    </footer>
+
+    ${state.modal === "calc" ? calcModal() : ""}
+    ${state.modal === "contact" ? contactModal() : ""}
+  `;
+
+  document.documentElement.lang = state.lang;
+  document.body.style.overflow = state.modal ? "hidden" : "";
+}
+
+function arrow(dir) {
+  const d = dir === "right" ? "M0 5h13M9 1l4 4-4 4" : "M15 5H2M6 1L2 5l4 4";
+  return `<svg width="15" height="10" viewBox="0 0 15 10" fill="none" aria-hidden="true"><path d="${d}" stroke="currentColor" stroke-width="1"/></svg>`;
+}
+
+const cross = `<svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1l-9 9" stroke="currentColor" stroke-width="1.1"/></svg>`;
+
+function contactModal() {
+  const d = L();
+  return `<div class="overlay" data-close="1">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${d.contactTitle}">
+      <div class="modal-head">
+        <div class="caps-lg">${d.contactTitle}</div>
+        <button class="modal-close" data-act="close" aria-label="Close">${cross}</button>
+      </div>
+      <div class="modal-body">
+        <p style="line-height:1.85;color:var(--ink-70);margin-top:0">${d.contactText}</p>
+        <div class="result-box" style="margin-bottom:12px">
+          <div class="caps muted">${d.contactPhone}</div>
+          <div class="display" style="font-size:28px;margin-top:6px">${PHONE}</div>
+        </div>
+        <div class="result-box">
+          <div class="caps muted">${d.contactEmail}</div>
+          <div class="display" style="font-size:24px;margin-top:6px">${EMAIL}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function calcModal() {
+  const d = L();
+  const titles = [d.step1, d.step2, d.step3, d.step4];
+  let body = "";
+
+  if (state.step === 1) {
+    const r = SHAPES[state.calcPet].weight;
+    body = `
+      <div class="field">
+        <label>${d.calcPetLabel}</label>
+        <div class="pet-picker">
+          ${PET_KINDS.map(p => `
+            <button class="pet-option" aria-pressed="${p === state.calcPet}" data-calcpet="${p}">
+              <span class="pet-glyph">${GLYPH[p]}</span><span class="caps">${petLabel(p)}</span>
+            </button>`).join("")}
+        </div>
+      </div>
+      <div class="field">
+        <label>${d.calcWeightLabel} · ${r[0]}–${r[1]}</label>
+        <input type="number" id="weight" min="${r[0]}" max="${r[1]}" step="0.1" value="${state.weight}">
+        <div class="caps muted" style="margin-top:10px;letter-spacing:.08em">${d.calcWeightHint}</div>
+      </div>
+      ${state.error ? `<div class="error">${state.error}</div>` : ""}
+      <button class="btn btn-solid" style="width:100%;margin-top:12px" data-act="calculate">${d.calcSubmit}</button>`;
+  }
+
+  if (state.step === 2 && state.dims) {
+    const dim = state.dims;
+    body = `
+      <div class="result-box">
+        <div class="caps muted">${d.calcResultTitle}</div>
+        <div class="result-dims">
+          <div><span class="caps muted">${d.calcLength}</span><strong>${dim.length}</strong><span class="caps muted">${d.cm}</span></div>
+          <div><span class="caps muted">${d.calcWidth}</span><strong>${dim.width}</strong><span class="caps muted">${d.cm}</span></div>
+          <div><span class="caps muted">${d.calcHeight}</span><strong>${dim.height}</strong><span class="caps muted">${d.cm}</span></div>
+        </div>
+      </div>
+      <div class="caps muted" style="margin-bottom:14px">${d.calcOffersTitle}</div>
+      ${state.offers.map(o => `
+        <button class="offer" aria-pressed="${state.chosenId === o.product.id}" data-offer="${o.product.id}">
+          <div class="offer-media">${coffinSvg(o.product.art)}</div>
+          <div>
+            <h4>${esc(nameOf(o.product))}</h4>
+            <div class="muted" style="font-size:12px;line-height:1.6">${esc(matOf(o.product))}</div>
+            <div class="offer-price">
+              <span class="caps" style="color:${o.exactFit ? "var(--gold)" : "var(--grey)"}">${o.exactFit ? d.calcExact : d.calcCustom}</span>
+              <span style="font-size:14px">${money(o.price)} ${d.uah}</span>
+            </div>
+          </div>
+        </button>`).join("")}
+      <div style="display:flex;gap:10px;margin-top:22px">
+        <button class="btn btn-sm" data-act="step" data-step="1">${d.back}</button>
+        <button class="btn btn-sm btn-solid" style="flex:1" data-act="step" data-step="3" ${state.chosenId ? "" : "disabled"}>${d.choose}</button>
+      </div>`;
+  }
+
+  if (state.step === 3 && state.chosenId) {
+    const o = state.offers.find(x => x.product.id === state.chosenId);
+    const dim = state.dims;
+    const f = state.form;
+    body = `
+      <div class="notice">
+        <b>${esc(nameOf(o.product))}</b> · ${dim.length}×${dim.width}×${dim.height} ${d.cm} · ${money(o.price)} ${d.uah}
+      </div>
+      <div class="field-row">
+        ${input("first_name", d.formFirstName, f.first_name)}
+        ${input("last_name", d.formLastName, f.last_name)}
+      </div>
+      ${input("phone", d.formPhone, f.phone, "tel", "+380")}
+      ${input("email", d.formEmail, f.email, "email")}
+      ${input("post_office", d.formPostOffice, f.post_office, "text", "Київ, №12")}
+      <div class="field">
+        <label>${d.formPayment}</label>
+        <select><option>${d.formPaymentTransfer}</option></select>
+      </div>
+      <div class="field">
+        <label>${d.formComment}</label>
+        <textarea data-field="comment">${esc(f.comment)}</textarea>
+      </div>
+      ${state.error ? `<div class="error">${state.error}</div>` : ""}
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn btn-sm" data-act="step" data-step="2">${d.back}</button>
+        <button class="btn btn-sm btn-solid" style="flex:1" data-act="submit">${d.formSubmit}</button>
+      </div>`;
+  }
+
+  if (state.step === 4) {
+    body = `
+      <div class="done-check"><svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true"><path d="M1 7l5.5 5.5L17 1" stroke="currentColor" stroke-width="1.4"/></svg></div>
+      <h3 class="display" style="font-size:30px;margin:0 0 14px">${d.doneTitle}</h3>
+      <p style="line-height:1.85;color:var(--ink-70);margin:0">${d.doneText}</p>
+      <div class="result-box" style="margin-top:26px">
+        <div class="caps muted">${d.doneNumber}</div>
+        <div class="display" style="font-size:30px;margin-top:6px">№${state.orderId}</div>
+      </div>
+      <div class="notice">
+        <div class="caps muted" style="margin-bottom:8px">${d.donePayTitle}</div>
+        ${PAY_DETAILS}
+        <div class="muted" style="margin-top:10px;font-size:12px">${d.donePayHint}</div>
+      </div>
+      <div class="notice" style="border-left-color:var(--ink)">
+        <span class="caps muted">Demo</span><br>${d.demoNote}
+      </div>
+      <button class="btn btn-solid" style="width:100%;margin-top:12px" data-act="close">${d.doneClose}</button>`;
+  }
+
+  return `<div class="overlay" data-close="1">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${d.calcTitle}">
+      <div class="modal-head">
+        <div>
+          <div class="caps-lg">${d.calcTitle}</div>
+          <div class="caps muted" style="margin-top:6px">${titles[state.step - 1]}</div>
+        </div>
+        <button class="modal-close" data-act="close" aria-label="Close">${cross}</button>
+      </div>
+      <div class="modal-body">
+        <div class="steps-bar">${[1,2,3,4].map(i => `<span class="${i <= state.step ? "on" : ""}"></span>`).join("")}</div>
+        ${body}
+      </div>
+    </div>
+  </div>`;
+}
+
+function input(name, label, value, type = "text", placeholder = "") {
+  return `<div class="field">
+    <label>${label}</label>
+    <input type="${type}" data-field="${name}" value="${esc(value)}" placeholder="${esc(placeholder)}">
+  </div>`;
+}
+
+/* ─────────────────────── події ─────────────────────── */
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act],[data-pet],[data-calcpet],[data-offer],[data-scroll]");
+
+  if (!el) {
+    if (e.target.dataset && e.target.dataset.close) { close(); }
+    return;
+  }
+
+  const act = el.dataset.act;
+
+  if (el.dataset.scroll) {
+    const rail = document.getElementById("rail");
+    rail.scrollBy({ left: Number(el.dataset.scroll) * Math.max(rail.clientWidth * .7, 260), behavior: "smooth" });
+    return;
+  }
+  if (el.dataset.pet) { state.pet = el.dataset.pet; render(); return; }
+  if (el.dataset.calcpet) {
+    state.calcPet = el.dataset.calcpet;
+    state.weight = SHAPES[state.calcPet].def;
+    render(); return;
+  }
+  if (el.dataset.offer) { state.chosenId = el.dataset.offer; render(); return; }
+
+  if (act === "lang") { state.lang = state.lang === "uk" ? "en" : "uk"; render(); return; }
+
+  if (act === "contact") { state.modal = "contact"; render(); return; }
+
+  if (act === "calc") {
+    state.modal = "calc";
+    state.step = 1;
+    state.error = "";
+    state.chosenId = null;
+    state.presetId = el.dataset.product || null;
+    if (el.dataset.petkind) {
+      state.calcPet = el.dataset.petkind;
+      state.weight = SHAPES[state.calcPet].def;
+    }
+    render(); return;
+  }
+
+  if (act === "close") { close(); return; }
+
+  if (act === "calculate") {
+    const w = Number(document.getElementById("weight").value);
+    if (!w || w <= 0) { state.error = L().formRequired; render(); return; }
+    state.weight = w;
+    state.error = "";
+    state.dims = calcDimensions(state.calcPet, w);
+    state.offers = pickOffers(state.calcPet, state.dims, 4);
+    const pre = state.presetId && state.offers.find(o => o.product.id === state.presetId);
+    state.chosenId = pre ? pre.product.id : null;
+    state.step = 2;
+    render(); return;
+  }
+
+  if (act === "step") { state.error = ""; state.step = Number(el.dataset.step); render(); return; }
+
+  if (act === "submit") {
+    const f = state.form;
+    if (!f.first_name.trim() || !f.last_name.trim() || !f.post_office.trim()) {
+      state.error = L().formRequired; render(); return;
+    }
+    if (!/^[\d+\s()-]{9,20}$/.test(f.phone.trim())) { state.error = L().formPhoneInvalid; render(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) { state.error = L().formEmailInvalid; render(); return; }
+    const now = new Date();
+    state.orderId = String(now.getDate()).padStart(2,"0") + String(now.getMonth()+1).padStart(2,"0")
+      + "-" + Math.floor(1000 + Math.random()*9000);
+    state.error = "";
+    state.step = 4;
+    render(); return;
+  }
+});
+
+/* поля форми — зберігаємо без перемальовування, щоб не втрачати фокус */
+document.addEventListener("input", e => {
+  const name = e.target.dataset && e.target.dataset.field;
+  if (name) state.form[name] = e.target.value;
+});
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+
+function close() {
+  state.modal = null;
+  state.step = 1;
+  state.error = "";
+  render();
+}
+
+render();
+</script>

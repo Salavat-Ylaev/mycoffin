@@ -1,0 +1,1021 @@
+/* ============================================================
+   SPOKIY — дизайн-система
+   Стиль: мінімалізм у дусі SSENSE. Багато повітря, тонкі лінії,
+   дрібний капс із широким трекінгом, жодних тіней і заокруглень.
+   Палітра: біле · чорне · золото · сіре.
+   ============================================================ */
+
+:root {
+  --paper: #fbfaf8;
+  --paper-2: #f2f0ed;
+  --ink: #0a0a0a;
+  --ink-70: #4a4a4a;
+  --grey: #8a8a8a;
+  --line: #e3e1de;
+  --gold: #b2954f;
+  --gold-soft: #d8c48c;
+
+  --ui: "Commissioner", "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  --display: "Cormorant Garamond", "Times New Roman", Times, Georgia, serif;
+
+  --pad: clamp(16px, 4vw, 56px);
+  --header-h: 96px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+/* ─────────────── типографіка ─────────────── */
+
+.caps {
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.caps-lg {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 12px;
+}
+
+.display {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.muted {
+  color: var(--grey);
+}
+
+.gold {
+  color: var(--gold);
+}
+
+/* ─────────────── кнопки ─────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 22px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 10px;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-solid {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-solid:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.btn-gold {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-gold:hover {
+  background: var(--gold);
+  color: var(--paper);
+}
+
+.btn-sm {
+  height: 34px;
+  padding: 0 16px;
+  font-size: 9px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link-underline {
+  position: relative;
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+}
+
+/* ─────────────── шапка ─────────────── */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: rgba(251, 250, 248, 0.92);
+  backdrop-filter: saturate(150%) blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 0 var(--pad);
+  height: var(--header-h);
+}
+
+.header-nav {
+  display: flex;
+  gap: 26px;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.brand {
+  text-align: center;
+  line-height: 1;
+}
+
+.brand-word {
+  font-size: clamp(18px, 2.4vw, 26px);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  font-weight: 500;
+}
+
+.brand-sub {
+  margin-top: 7px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.lang-toggle {
+  border: 1px solid var(--line);
+  height: 30px;
+  min-width: 44px;
+  padding: 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.lang-toggle:hover {
+  border-color: var(--ink);
+  color: var(--gold);
+}
+
+.header-mobile-cta {
+  display: none;
+}
+
+/* ─────────────── головний екран ─────────────── */
+
+.hero {
+  padding: clamp(70px, 12vw, 150px) var(--pad) clamp(50px, 8vw, 96px);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(30px, 6vw, 90px);
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(40px, 7.2vw, 96px);
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-side {
+  padding-bottom: 10px;
+}
+
+.hero-text {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-70);
+  max-width: 42ch;
+}
+
+.hero-rule {
+  width: 54px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 0 22px;
+}
+
+/* ─────────────── блок підтримки ─────────────── */
+
+.comfort {
+  padding: clamp(56px, 9vw, 112px) var(--pad);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: clamp(24px, 5vw, 64px);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-2);
+}
+
+.comfort-body {
+  max-width: 74ch;
+}
+
+.comfort-body p {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(19px, 2.3vw, 27px);
+  line-height: 1.6;
+}
+
+.comfort-sign {
+  margin-top: 26px;
+  color: var(--grey);
+}
+
+/* ─────────────── каталог ─────────────── */
+
+.catalog {
+  padding: clamp(56px, 9vw, 104px) 0 clamp(48px, 8vw, 92px);
+  border-bottom: 1px solid var(--line);
+}
+
+.catalog-head {
+  padding: 0 var(--pad);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.catalog-title {
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 52px);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 28px var(--pad) 0;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 10px;
+  color: var(--grey);
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.rail-wrap {
+  position: relative;
+  margin-top: 30px;
+}
+
+.rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(255px, 25vw);
+  gap: 1px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--pad);
+  padding: 0 var(--pad);
+  scrollbar-width: none;
+  background: var(--line);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  scroll-snap-align: start;
+  background: var(--paper);
+  padding: 22px 22px 26px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.card-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--paper-2);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-media svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--paper);
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+}
+
+.card-badge.out {
+  color: var(--grey);
+}
+
+.card-name {
+  font-family: var(--display);
+  font-size: 21px;
+  margin: 0 0 6px;
+}
+
+.card-material {
+  color: var(--grey);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.card-meta {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.card-price {
+  font-size: 14px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-price small {
+  color: var(--grey);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-right: 5px;
+}
+
+.card-cta {
+  margin-top: 16px;
+}
+
+.rail-nav {
+  display: flex;
+  gap: 8px;
+  padding: 22px var(--pad) 0;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.rail-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+
+.rail-btn:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ─────────────── як ми працюємо + підвал ─────────────── */
+
+.steps {
+  padding: clamp(56px, 9vw, 104px) var(--pad);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: clamp(26px, 4vw, 60px);
+  border-bottom: 1px solid var(--line);
+}
+
+.step-num {
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.step h3 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 400;
+  margin: 0 0 10px;
+}
+
+.step p {
+  margin: 0;
+  color: var(--ink-70);
+  line-height: 1.8;
+  max-width: 34ch;
+}
+
+.footer {
+  padding: clamp(40px, 6vw, 72px) var(--pad) 40px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 26px;
+  align-items: end;
+}
+
+.footer-links {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+/* ─────────────── модальні вікна ─────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(10, 10, 10, 0.42);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: flex-end;
+  animation: fade 0.25s ease;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal {
+  background: var(--paper);
+  width: min(560px, 100%);
+  height: 100%;
+  overflow-y: auto;
+  animation: slide 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(28px);
+    opacity: 0.4;
+  }
+}
+
+.modal-head {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  padding: 22px clamp(20px, 4vw, 38px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 2;
+}
+
+.modal-body {
+  padding: clamp(24px, 4vw, 38px);
+  flex: 1;
+}
+
+.modal-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+  flex: none;
+}
+
+.modal-close:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.steps-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 30px;
+}
+
+.steps-bar span {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+}
+
+.steps-bar span.on {
+  background: var(--gold);
+}
+
+/* ─────────────── форми ─────────────── */
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 9px;
+  color: var(--grey);
+  margin-bottom: 8px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  background: transparent;
+  padding: 9px 0;
+  font-family: var(--ui);
+  font-size: 14px;
+  color: var(--ink);
+  border-radius: 0;
+  appearance: none;
+}
+
+.field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 11px) 17px, calc(100% - 6px) 17px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 24px;
+}
+
+.field textarea {
+  border: 1px solid var(--line);
+  padding: 12px;
+  min-height: 88px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.pet-picker {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.pet-option {
+  border: 1px solid var(--line);
+  padding: 16px 14px;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pet-option:hover {
+  border-color: var(--ink);
+}
+
+.pet-option[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pet-option[aria-pressed="true"] .pet-glyph {
+  color: var(--gold-soft);
+}
+
+.pet-glyph {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.result-box {
+  border: 1px solid var(--ink);
+  padding: 22px;
+  margin-bottom: 28px;
+}
+
+.result-dims {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.result-dims div {
+  border-left: 1px solid var(--line);
+  padding-left: 12px;
+}
+
+.result-dims strong {
+  display: block;
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.offer {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 16px;
+  border: 1px solid var(--line);
+  padding: 14px;
+  margin-bottom: 10px;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.2s;
+  align-items: start;
+}
+
+.offer:hover {
+  border-color: var(--ink);
+}
+
+.offer[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.offer-media {
+  aspect-ratio: 4 / 5;
+  background: var(--paper-2);
+  overflow: hidden;
+}
+
+.offer-media img,
+.offer-media svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offer h4 {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.offer-price {
+  margin-top: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notice {
+  border-left: 2px solid var(--gold);
+  background: var(--paper-2);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 18px 0;
+}
+
+.error {
+  color: #a33;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.done-check {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+}
+
+/* ─────────────── адмінка ─────────────── */
+
+.admin {
+  padding: 30px var(--pad) 90px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 18px;
+  margin-bottom: 26px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 26px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 9px;
+  color: var(--grey);
+  font-weight: 400;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.admin-table input,
+.admin-table select {
+  width: 100%;
+  min-width: 70px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 6px 8px;
+  font: inherit;
+  border-radius: 0;
+}
+
+.admin-table input:focus,
+.admin-table select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.admin-thumb {
+  width: 46px;
+  height: 58px;
+  object-fit: cover;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  margin-right: 7px;
+}
+
+.login-wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(370px, 100%);
+  border: 1px solid var(--line);
+  padding: 38px 32px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 22px;
+  z-index: 120;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+/* ─────────────── адаптив ─────────────── */
+
+@media (max-width: 900px) {
+  :root {
+    --header-h: 78px;
+  }
+
+  .header-nav {
+    display: none;
+  }
+
+  .header-inner {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .hero,
+  .comfort {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    align-items: start;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions .btn-desktop {
+    display: none;
+  }
+
+  .header-mobile-cta {
+    display: flex;
+    gap: 8px;
+    padding: 0 var(--pad) 14px;
+  }
+
+  .header-mobile-cta .btn {
+    flex: 1;
+  }
+
+  .rail {
+    grid-auto-columns: minmax(230px, 74vw);
+  }
+}
+
+@media (max-width: 560px) {
+  .field-row,
+  .pet-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .offer {
+    grid-template-columns: 72px 1fr;
+  }
+}
+
+/* ─────────────── сітки в адмінці ─────────────── */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 18px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 18px;
+}
+
+.admin-product {
+  border: 1px solid var(--line);
+  padding: 18px;
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+}
+
+.admin-product-media {
+  aspect-ratio: 4 / 5;
+  background: var(--paper-2);
+  overflow: hidden;
+}
+
+.admin-product-media img,
+.admin-product-media svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .grid-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-product {
+    grid-template-columns: 1fr;
+  }
+  .admin-product-media {
+    max-width: 130px;
+  }
+}
+
+@media (max-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
