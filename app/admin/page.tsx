@@ -47,6 +47,28 @@ interface Health {
   tested: boolean;
 }
 
+
+/**
+ * Безпечне читання відповіді. Сервер може віддати порожнє тіло
+ * (наприклад, коли обриває завеликий запит) — тоді JSON.parse падає
+ * з «Unexpected end of JSON input», і причина лишається невідомою.
+ * Тут будь-яка відповідь перетворюється на зрозумілий текст.
+ */
+async function readBody(res: Response): Promise<{ error?: string; [k: string]: unknown }> {
+  const text = await res.text().catch(() => "");
+  if (!text) {
+    if (res.status === 413) {
+      return { error: "Файл завеликий для сервера — оберіть менше фото" };
+    }
+    return { error: `Сервер відповів без тексту (код ${res.status})` };
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: `Сервер відповів помилкою ${res.status}: ${text.slice(0, 200)}` };
+  }
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
@@ -135,8 +157,8 @@ export default function AdminPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(p),
     });
-    const data = await res.json();
-    if (!res.ok) return flash(data.error || "Помилка збереження");
+    const data = await readBody(res);
+    if (!res.ok) return flash(data.error || "Помилка збереження", 7000);
     flash(`Збережено: ${p.name_uk}`);
     loadProducts();
   };
@@ -227,18 +249,14 @@ export default function AdminPage() {
       flash("Завантажуємо…");
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
 
-      let data: { url?: string; error?: string } = {};
-      try {
-        data = await res.json();
-      } catch {
-        /* хостинг міг відповісти не-JSON — покажемо код статусу */
-      }
-      if (!res.ok || !data.url) {
+      const data = await readBody(res);
+      const url = typeof data.url === "string" ? data.url : "";
+      if (!res.ok || !url) {
         throw new Error(data.error || `Сервер відповів помилкою ${res.status}`);
       }
 
       // одразу зберігаємо, щоб фото не загубилось, якщо забути натиснути «Зберегти»
-      const updated: Product = { ...p, image: data.url };
+      const updated: Product = { ...p, image: url };
       setProducts((list) => list.map((x) => (x.id === p.id ? updated : x)));
       await save(updated);
     } catch (e) {
@@ -259,8 +277,8 @@ export default function AdminPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(o),
     });
-    const data = await res.json();
-    if (!res.ok) return flash(data.error || "Помилка збереження");
+    const data = await readBody(res);
+    if (!res.ok) return flash(data.error || "Помилка збереження", 7000);
     flash(`Збережено: ${o.label_uk}`);
     loadEngraving();
   };

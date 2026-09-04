@@ -52,14 +52,28 @@ export async function POST(req: NextRequest) {
       : "minimal",
   };
 
-  const saved = await upsertProduct(product);
-  return NextResponse.json(saved);
+  try {
+    const saved = await upsertProduct(product);
+    return NextResponse.json(saved);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "не вдалося зберегти";
+    console.error("POST /api/admin/products:", e);
+    const hint = /column .* does not exist|prices/i.test(msg)
+      ? " — у базі стара структура таблиці products. Виконайте supabase.sql заново в SQL Editor."
+      : "";
+    return NextResponse.json({ error: msg + hint }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
   if (!(await isAdmin())) return deny();
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "no id" }, { status: 400 });
-  await deleteProduct(id);
-  return NextResponse.json({ ok: true });
+  try {
+    await deleteProduct(id);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "не вдалося видалити";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

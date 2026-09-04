@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
     enabled: Boolean(b.enabled),
   };
 
-  const saved = await upsertEngravingOption(option);
-  return NextResponse.json(saved);
+  try {
+    const saved = await upsertEngravingOption(option);
+    return NextResponse.json(saved);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "не вдалося зберегти";
+    console.error("POST /api/admin/engraving:", e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
