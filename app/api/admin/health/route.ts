@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
     env: {
       TELEGRAM_BOT_TOKEN: has("TELEGRAM_BOT_TOKEN"),
       TELEGRAM_CHAT_ID: has("TELEGRAM_CHAT_ID"),
+      BREVO_API_KEY: has("BREVO_API_KEY"),
       SMTP_HOST: has("SMTP_HOST"),
       SMTP_USER: has("SMTP_USER"),
       SMTP_PASS: has("SMTP_PASS"),

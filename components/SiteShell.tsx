@@ -5,7 +5,7 @@ import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import { t, type Lang } from "@/lib/i18n";
 import { sizesFor, sizeById, priceOf, type PetSize } from "@/lib/calc";
-import CoffinArt from "./CoffinArt";
+import ProductImage from "./ProductImage";
 import CalculatorModal from "./CalculatorModal";
 import ContactModal from "./ContactModal";
 
@@ -202,16 +202,12 @@ export default function SiteShell({
               {list.map((p) => (
                 <article className="card" key={p.id}>
                   <div className="card-media">
-                    {p.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.image} alt={lang === "uk" ? p.name_uk : p.name_en} />
-                    ) : (
-                      <CoffinArt
-                        art={p.art}
-                        pet={p.pet}
-                        label={lang === "uk" ? p.name_uk : p.name_en}
-                      />
-                    )}
+                    <ProductImage
+                      src={p.image}
+                      alt={lang === "uk" ? p.name_uk : p.name_en}
+                      art={p.art}
+                      pet={p.pet}
+                    />
                     <span className={`card-badge caps ${p.in_stock ? "" : "out"}`}>
                       {p.in_stock ? L.inStock : L.outStock}
                     </span>

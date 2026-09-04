@@ -67,6 +67,10 @@ tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:var(--sunk)}
 th.code,td.code{text-align:left;font-family:var(--mono);font-size:12px;color:var(--gold)}
 th.dim,td.dim{text-align:left}
+th.mdl,td.mdl{text-align:left}
+th.who,td.who{text-align:left;white-space:normal;color:var(--grey);font-size:12.5px;min-width:200px}
+th.qty,td.qty{text-align:center}
+tfoot td{border-top:1px solid var(--ink);border-bottom:none;padding-top:12px}
 
 .foot{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);
   color:var(--grey);font-size:13px;line-height:1.8}
@@ -161,6 +165,91 @@ th.dim,td.dim{text-align:left}
       </thead>
       <tbody><tr><td class="code">C1</td><td class="dim">25 × 15 × 10</td><td>1 650</td><td>1 250</td><td>1 850</td><td>2 250</td><td>900</td></tr><tr><td class="code">C2</td><td class="dim">50 × 25 × 20</td><td>2 850</td><td>2 200</td><td>3 150</td><td>3 700</td><td>1 650</td></tr><tr><td class="code">C3</td><td class="dim">65 × 30 × 25</td><td>4 150</td><td>3 100</td><td>4 600</td><td>5 400</td><td>2 350</td></tr><tr><td class="code">C4</td><td class="dim">75 × 35 × 30</td><td>4 700</td><td>3 550</td><td>5 200</td><td>6 100</td><td>2 650</td></tr><tr><td class="code">C5</td><td class="dim">95 × 25 × 20</td><td>5 000</td><td>3 900</td><td>5 500</td><td>6 500</td><td>2 900</td></tr><tr><td class="code">C6</td><td class="dim">100 × 45 × 40</td><td>7 000</td><td>5 550</td><td>7 900</td><td>9 150</td><td>4 300</td></tr><tr><td class="code">C7</td><td class="dim">135 × 60 × 55</td><td>9 100</td><td>7 200</td><td>10 200</td><td>11 850</td><td>5 550</td></tr></tbody>
     </table>
+  </div>
+
+
+  <h2>Перше замовлення в цех</h2>
+  <p class="sub">12 виробів. Розподіл — за очікуваним попитом, не рівними частками.</p>
+
+  <div class="note">
+    <b>Що не замовляємо зараз.</b> «Голд Лайн» — це той самий білий корпус,
+    що й «Мінімал», плюс гравіювання; тримати його окремо на складі не потрібно,
+    гравіюємо з готового під замовлення. «Ноар» (чорна емаль) і корпус C5 для
+    великих рептилій — рідкісний попит, беремо під конкретне замовлення.
+  </div>
+
+  <div class="tbl-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="code">Код</th>
+          <th class="dim">Внутр. розмір, см</th>
+          <th class="mdl">Модель</th>
+          <th class="qty">К-сть</th>
+          <th>Ціна, грн</th>
+          <th>Сума, грн</th>
+          <th class="who">Для кого</th>
+        </tr>
+      </thead>
+      <tbody><tr><td class="code">C3</td><td class="dim">65×30×25</td><td class="mdl">Класик</td><td class="qty">2</td><td>4 150</td><td>8 300</td><td class="who">кіт до 5 кг · пес до 10 кг</td></tr><tr><td class="code">C3</td><td class="dim">65×30×25</td><td class="mdl">Мінімал</td><td class="qty">2</td><td>3 100</td><td>6 200</td><td class="who">кіт до 5 кг · пес до 10 кг</td></tr><tr><td class="code">C3</td><td class="dim">65×30×25</td><td class="mdl">Еко</td><td class="qty">1</td><td>2 350</td><td>2 350</td><td class="who">кіт до 5 кг · пес до 10 кг</td></tr><tr><td class="code">C4</td><td class="dim">75×35×30</td><td class="mdl">Класик</td><td class="qty">1</td><td>4 700</td><td>4 700</td><td class="who">великий кіт 5–12 кг</td></tr><tr><td class="code">C4</td><td class="dim">75×35×30</td><td class="mdl">Мінімал</td><td class="qty">1</td><td>3 550</td><td>3 550</td><td class="who">великий кіт 5–12 кг</td></tr><tr><td class="code">C6</td><td class="dim">100×45×40</td><td class="mdl">Класик</td><td class="qty">1</td><td>7 000</td><td>7 000</td><td class="who">пес 10–35 кг</td></tr><tr><td class="code">C6</td><td class="dim">100×45×40</td><td class="mdl">Мінімал</td><td class="qty">1</td><td>5 550</td><td>5 550</td><td class="who">пес 10–35 кг</td></tr><tr><td class="code">C7</td><td class="dim">135×60×55</td><td class="mdl">Класик</td><td class="qty">1</td><td>9 100</td><td>9 100</td><td class="who">пес 35–90 кг</td></tr><tr><td class="code">C2</td><td class="dim">50×25×20</td><td class="mdl">Мінімал</td><td class="qty">1</td><td>2 050</td><td>2 050</td><td class="who">гризун 0,5–4 кг · рептилія до 1 кг</td></tr><tr><td class="code">C1</td><td class="dim">25×15×10</td><td class="mdl">Мінімал</td><td class="qty">1</td><td>1 250</td><td>1 250</td><td class="who">гризун до 0,5 кг</td></tr></tbody>
+      <tfoot>
+        <tr>
+          <td class="code"></td><td class="dim"><b>Разом</b></td><td class="mdl"></td>
+          <td class="qty"><b>12</b></td><td></td>
+          <td><b>50 050</b></td><td class="who"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <p class="sub" style="margin-top:14px">
+    Сума — роздрібна вартість партії, тобто скільки вона поверне при продажу.
+    Собівартість залежить від прорахунку цеху.
+  </p>
+
+  <h2>Чому саме так</h2>
+  <div class="grid">
+    <article class="corpus">
+      <div class="corpus-code">C3 · 5 шт</div>
+      <div class="corpus-shape">половина партії</div>
+      <ul class="corpus-use">
+        <li>Єдиний корпус, який закриває одразу дві найчастіші групи: коти до 5 кг
+            і дрібні собаки до 10 кг. Це основна маса звернень, тому запас найбільший
+            і в трьох оздобленнях відразу.</li>
+      </ul>
+    </article>
+    <article class="corpus">
+      <div class="corpus-code">C4 · 2 шт</div>
+      <div class="corpus-shape">великі коти</div>
+      <ul class="corpus-use">
+        <li>Мейн-куни й великі метиси трапляються регулярно, а підмінити їх C3 не вийде —
+            не влізе. Дві штуки, дерево і біла емаль.</li>
+      </ul>
+    </article>
+    <article class="corpus">
+      <div class="corpus-code">C6 · 2 шт</div>
+      <div class="corpus-shape">середні собаки</div>
+      <ul class="corpus-use">
+        <li>Бігль, кокер, лабрадор — найпоширеніші «сімейні» собаки.
+            Друга за частотою група після C3.</li>
+      </ul>
+    </article>
+    <article class="corpus">
+      <div class="corpus-code">C7 · 1 шт</div>
+      <div class="corpus-shape">великі собаки</div>
+      <ul class="corpus-use">
+        <li>Попит рідкий, але саме тут не можна сказати «зачекайте три дні»:
+            вівчарку ні в що інше не покласти. Одна штука як страховка.</li>
+      </ul>
+    </article>
+    <article class="corpus">
+      <div class="corpus-code">C1 і C2 · по 1 шт</div>
+      <div class="corpus-shape">гризуни, дрібні рептилії</div>
+      <ul class="corpus-use">
+        <li>Звернень мало, і власники частіше ховають самі. Але вироби дешеві
+            й місця майже не займають — тримаємо по одному, щоб не відмовляти.</li>
+      </ul>
+    </article>
   </div>
 
   <div class="foot">

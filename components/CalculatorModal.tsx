@@ -14,7 +14,7 @@ import {
   type PetSize,
 } from "@/lib/calc";
 import { t, type Lang } from "@/lib/i18n";
-import CoffinArt from "./CoffinArt";
+import ProductImage from "./ProductImage";
 
 const GLYPH: Record<PetKind, string> = {
   cat: "🐈",
@@ -331,12 +331,12 @@ export default function CalculatorModal({
                   onClick={() => setChosen(o)}
                 >
                   <div className="offer-media">
-                    {o.product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={o.product.image} alt="" />
-                    ) : (
-                      <CoffinArt art={o.product.art} pet={o.product.pet} />
-                    )}
+                    <ProductImage
+                      src={o.product.image}
+                      alt={lang === "uk" ? o.product.name_uk : o.product.name_en}
+                      art={o.product.art}
+                      pet={o.product.pet}
+                    />
                   </div>
                   <div>
                     <h4>{lang === "uk" ? o.product.name_uk : o.product.name_en}</h4>

@@ -10,7 +10,7 @@ import type {
 } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import { sizesFor, sizeById } from "@/lib/calc";
-import CoffinArt from "@/components/CoffinArt";
+import ProductImage from "@/components/ProductImage";
 
 const PET_LABEL: Record<PetKind, string> = {
   cat: "Кіт",
@@ -375,12 +375,7 @@ export default function AdminPage() {
             <div key={p.id} className="admin-product">
               <div>
                 <div className="admin-product-media">
-                  {p.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.image} alt="" />
-                  ) : (
-                    <CoffinArt art={p.art} pet={p.pet} />
-                  )}
+                  <ProductImage src={p.image} alt={p.name_uk} art={p.art} pet={p.pet} />
                 </div>
                 <label className="btn btn-sm" style={{ width: "100%", marginTop: 8 }}>
                   {p.image ? "Замінити фото" : "Додати фото"}

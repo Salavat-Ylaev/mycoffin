@@ -2,10 +2,25 @@ import nodemailer, { Transporter } from "nodemailer";
 import type { Order } from "./types";
 import { orderToText } from "./telegram";
 
-let _tx: Transporter | null = null;
+/**
+ * Пошта має два канали.
+ *
+ * 1. HTTP API Brevo — основний. Serverless-функція живе секунди й щоразу
+ *    стартує з нової IP-адреси, а Brevo на це реагує блокуванням SMTP-логіна.
+ *    Через API такої проблеми немає: ключ не прив'язаний до IP, і немає
+ *    повільного SMTP-рукостискання, яке на хостингу часто відвалюється.
+ *
+ * 2. SMTP через nodemailer — запасний, якщо ключа API немає.
+ */
 
-export const mailConfigured = () =>
+const BREVO_KEY = () => process.env.BREVO_API_KEY;
+
+const smtpConfigured = () =>
   Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+export const mailConfigured = () => Boolean(BREVO_KEY()) || smtpConfigured();
+
+let _tx: Transporter | null = null;
 
 function transport(): Transporter {
   if (!_tx) {
@@ -25,6 +40,59 @@ function transport(): Transporter {
 const from = () =>
   process.env.MAIL_FROM || `SPOKIY <${process.env.SMTP_USER ?? "no-reply@localhost"}>`;
 
+/** Розбирає `Ім'я <адреса>` на частини — цього вимагає API Brevo */
+function parseFrom(): { name: string; email: string } {
+  const raw = from().trim();
+  const m = raw.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+  if (m) return { name: m[1].trim() || "SPOKIY", email: m[2].trim() };
+  return { name: "SPOKIY", email: raw.replace(/[<>]/g, "").trim() };
+}
+
+interface Letter {
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  replyTo?: string;
+}
+
+async function sendViaBrevo(l: Letter): Promise<void> {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": BREVO_KEY()!,
+      "Content-Type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender: parseFrom(),
+      to: [{ email: l.to }],
+      subject: l.subject,
+      ...(l.html ? { htmlContent: l.html } : {}),
+      ...(l.text ? { textContent: l.text } : {}),
+      ...(l.replyTo ? { replyTo: { email: l.replyTo } } : {}),
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Brevo API ${res.status}: ${body.slice(0, 300)}`);
+  }
+}
+
+/** Один вхід для обох каналів */
+async function send(l: Letter): Promise<void> {
+  if (BREVO_KEY()) return sendViaBrevo(l);
+  await transport().sendMail({
+    from: from(),
+    to: l.to,
+    replyTo: l.replyTo,
+    subject: l.subject,
+    text: l.text,
+    html: l.html,
+  });
+}
+
 const money = (n: number) => `${n.toLocaleString("uk-UA")} грн`;
 
 /** Лист власнику: сирі дані замовлення */
@@ -32,8 +100,7 @@ export async function mailOwner(o: Order): Promise<boolean> {
   const to = process.env.OWNER_EMAIL;
   if (!mailConfigured() || !to) return false;
   try {
-    await transport().sendMail({
-      from: from(),
+    await send({
       to,
       replyTo: o.email || undefined,
       subject: `Нове замовлення №${o.id} — ${o.item.product_name}, ${o.total_uah} грн`,
@@ -102,8 +169,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
 </div>`;
 
   try {
-    await transport().sendMail({
-      from: from(),
+    await send({
       to: o.email,
       subject: `Замовлення №${o.id} прийнято — SPOKIY`,
       html,
@@ -145,41 +211,55 @@ function esc(s: string) {
 }
 
 /** Перевірка SMTP: підключення, а за потреби — тестовий лист власнику */
-export async function checkMail(send: boolean): Promise<{
+export async function checkMail(doSend: boolean): Promise<{
   configured: boolean;
   ok: boolean;
   error?: string;
 }> {
   if (!mailConfigured()) {
-    const missing = [
-      !process.env.SMTP_HOST && "SMTP_HOST",
-      !process.env.SMTP_USER && "SMTP_USER",
-      !process.env.SMTP_PASS && "SMTP_PASS",
-    ].filter(Boolean);
-    return { configured: false, ok: false, error: `Немає ${missing.join(", ")}` };
+    return {
+      configured: false,
+      ok: false,
+      error: "Немає BREVO_API_KEY (або SMTP_HOST / SMTP_USER / SMTP_PASS)",
+    };
   }
   if (!process.env.OWNER_EMAIL) {
     return { configured: false, ok: false, error: "Немає OWNER_EMAIL" };
   }
 
-  try {
-    await transport().verify();
-    if (!send) return { configured: true, ok: true };
+  const channel = BREVO_KEY() ? "Brevo API" : "SMTP";
 
-    await transport().sendMail({
-      from: from(),
+  try {
+    if (BREVO_KEY()) {
+      // перевіряємо сам ключ — так видно проблему ще до відправки листа
+      const res = await fetch("https://api.brevo.com/v3/account", {
+        headers: { "api-key": BREVO_KEY()!, accept: "application/json" },
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`ключ не приймається (${res.status}) ${body.slice(0, 200)}`);
+      }
+    } else {
+      await transport().verify();
+    }
+
+    if (!doSend) return { configured: true, ok: true };
+
+    await send({
       to: process.env.OWNER_EMAIL,
       subject: "SPOKIY: перевірка пошти",
-      text: "Якщо ви бачите цей лист — сповіщення про замовлення надсилаються правильно.",
+      text: `Якщо ви бачите цей лист — сповіщення про замовлення надсилаються правильно. Канал: ${channel}.`,
     });
     return { configured: true, ok: true };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "smtp error";
-    const hint = /not verified|unrecognized|sender/i.test(msg)
-      ? " — адресу відправника треба підтвердити в кабінеті Brevo (Senders & Domains)"
-      : /auth/i.test(msg)
-        ? " — перевірте SMTP_USER і SMTP_PASS"
-        : "";
-    return { configured: true, ok: false, error: msg + hint };
+    const msg = e instanceof Error ? e.message : "mail error";
+    const hint = /not verified|unrecognized|sender|not valid/i.test(msg)
+      ? " — адресу відправника треба підтвердити в кабінеті Brevo, розділ Senders & Domains"
+      : /unauthorized|401|403|ip/i.test(msg)
+        ? " — Brevo блокує доступ. Якщо працюєте через SMTP, увімкніть BREVO_API_KEY: ключ не прив'язаний до IP"
+        : /auth/i.test(msg)
+          ? " — перевірте SMTP_USER і SMTP_PASS"
+          : "";
+    return { configured: true, ok: false, error: `${channel}: ${msg}${hint}` };
   }
 }
