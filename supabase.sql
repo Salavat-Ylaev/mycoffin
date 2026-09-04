@@ -92,3 +92,10 @@ on conflict (id) do nothing;
 insert into storage.buckets (id, name, public)
 values ('coffins', 'coffins', true)
 on conflict (id) do nothing;
+
+-- ============================================================
+--  Обновить кэш схемы Supabase.
+--  Без этого API какое-то время не видит новые колонки
+--  и отвечает «Could not find the 'prices' column».
+-- ============================================================
+notify pgrst, 'reload schema';
