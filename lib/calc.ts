@@ -8,7 +8,8 @@ import type { PetKind, Product } from "./types";
  * Коефіцієнт k підібраний під пропорції кожного виду.
  * Далі додається технологічний запас на підстилку та вільний простір.
  *
- * Усі розміри округлюються ВГОРУ до цілих сантиметрів.
+ * Усі розміри округлюються ВГОРУ до кратних 5 см:
+ * 54×23×19 стає 55×25×20. Так простіше різати матеріал і тримати склад.
  */
 
 interface Shape {
@@ -223,16 +224,22 @@ export interface Dimensions {
   height: number;
 }
 
+/** Округлення вгору до кратних 5: 23 → 25, 54 → 55 */
+const up5 = (n: number) => Math.ceil(n / 5) * 5;
+
 export function calcDimensions(pet: PetKind, weightKg: number): Dimensions {
   const s = SHAPES[pet];
   const w = Math.min(Math.max(weightKg, s.weight[0]), s.weight[1]);
 
-  const body = s.k * Math.cbrt(w);
-  const length = Math.ceil(Math.max(body * (1 + s.margin), s.min[0]));
-  const width = Math.ceil(Math.max(length * s.widthRatio, s.min[1]));
-  const height = Math.ceil(Math.max(length * s.heightRatio, s.min[2]));
+  // спершу «сирі» розміри, і лише потім округлення —
+  // інакше похибка накопичується на ширині й висоті
+  const raw = Math.max(s.k * Math.cbrt(w) * (1 + s.margin), s.min[0]);
 
-  return { length, width, height };
+  return {
+    length: up5(raw),
+    width: up5(Math.max(raw * s.widthRatio, s.min[1])),
+    height: up5(Math.max(raw * s.heightRatio, s.min[2])),
+  };
 }
 
 /** Типовий розмір для групи — те, що показуємо в каталозі */

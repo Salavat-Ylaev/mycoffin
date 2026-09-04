@@ -385,14 +385,17 @@ const SHAPES = {
   rodent:{k:23,w:.46,h:.38,margin:.16,min:[18,11,9],weight:[.02,12]}
 };
 
+const up5 = n => Math.ceil(n / 5) * 5;
+
 function calcDimensions(pet, kg) {
   const s = SHAPES[pet];
   const w = Math.min(Math.max(kg, s.weight[0]), s.weight[1]);
-  const body = s.k * Math.cbrt(w);
-  const length = Math.ceil(Math.max(body * (1 + s.margin), s.min[0]));
-  const width  = Math.ceil(Math.max(length * s.w, s.min[1]));
-  const height = Math.ceil(Math.max(length * s.h, s.min[2]));
-  return { length, width, height };
+  const raw = Math.max(s.k * Math.cbrt(w) * (1 + s.margin), s.min[0]);
+  return {
+    length: up5(raw),
+    width:  up5(Math.max(raw * s.w, s.min[1])),
+    height: up5(Math.max(raw * s.h, s.min[2]))
+  };
 }
 
 const dimsForCategory = c => calcDimensions(c.pet, c.ref);
