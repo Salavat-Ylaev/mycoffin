@@ -17,15 +17,12 @@ export interface Product {
   desc_uk: string;
   desc_en: string;
 
-  /** Внутрішня довжина, у межах якої модель виготовляється (см) */
-  min_length_cm: number;
-  max_length_cm: number;
-
-  /** Ціна за еталонну довжину base_length_cm */
-  base_price_uah: number;
-  base_length_cm: number;
-  /** Наскільки дорожчає кожен додатковий сантиметр довжини */
-  price_per_cm_uah: number;
+  /**
+   * Ціна за кожен стандартний корпус: { "s3": 4150, "s4": 4700 }.
+   * Ключі — id корпусів із lib/calc.ts. Нуль або відсутній ключ —
+   * модель у цьому розмірі не виготовляється.
+   */
+  prices: Record<string, number>;
 
   in_stock: boolean;
   /** URL фото. Порожньо — показуємо векторну ілюстрацію */
@@ -52,10 +49,13 @@ export interface OrderItem {
   product_name: string;
   material: string;
   price_uah: number;
+  /** стандартний корпус */
+  size_id: string;
+  size_code: string;
   length_cm: number;
   width_cm: number;
   height_cm: number;
-  /** true — довжина виходить за штатний діапазон моделі, потрібні +1–3 дні */
+  /** true — вага поза стандартним рядом, розмір індивідуальний */
   custom_size: boolean;
 }
 
@@ -73,7 +73,6 @@ export interface Order {
   created_at: string;
   pet: PetKind;
   weight_kg: number;
-  category_id: string;
   first_name: string;
   last_name: string;
   phone: string;

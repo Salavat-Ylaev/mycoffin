@@ -9,7 +9,7 @@ import type {
   Product,
 } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
-import { categoryById } from "@/lib/calc";
+import { sizesFor, sizeById } from "@/lib/calc";
 import CoffinArt from "@/components/CoffinArt";
 
 const PET_LABEL: Record<PetKind, string> = {
@@ -158,11 +158,7 @@ export default function AdminPage() {
       material_en: "",
       desc_uk: "",
       desc_en: "",
-      min_length_cm: 20,
-      max_length_cm: 60,
-      base_price_uah: 2000,
-      base_length_cm: 40,
-      price_per_cm_uah: 40,
+      prices: Object.fromEntries(sizesFor(pet).map((o) => [o.sizeId, 0])),
       in_stock: true,
       image: "",
       art: "minimal",
@@ -173,6 +169,16 @@ export default function AdminPage() {
   const patch = (id: string, key: keyof Product, value: unknown) =>
     setProducts((list) =>
       list.map((p) => (p.id === id ? ({ ...p, [key]: value } as Product) : p))
+    );
+
+  /** ціна моделі під конкретний корпус */
+  const patchPrice = (id: string, sizeId: string, value: string) =>
+    setProducts((list) =>
+      list.map((p) =>
+        p.id === id
+          ? { ...p, prices: { ...(p.prices ?? {}), [sizeId]: Number(value) || 0 } }
+          : p
+      )
     );
 
   const upload = async (p: Product, file: File) => {
@@ -348,11 +354,18 @@ export default function AdminPage() {
                 </div>
 
                 <div className="grid-4" style={{ marginTop: 6 }}>
-                  <Cell label="Довжина від, см" type="number" value={p.min_length_cm} onChange={(v) => patch(p.id, "min_length_cm", Number(v))} />
-                  <Cell label="Довжина до, см" type="number" value={p.max_length_cm} onChange={(v) => patch(p.id, "max_length_cm", Number(v))} />
-                  <Cell label="Базова довжина, см" type="number" value={p.base_length_cm} onChange={(v) => patch(p.id, "base_length_cm", Number(v))} />
-                  <Cell label="Ціна за базову, грн" type="number" value={p.base_price_uah} onChange={(v) => patch(p.id, "base_price_uah", Number(v))} />
-                  <Cell label="Доплата за 1 см, грн" type="number" value={p.price_per_cm_uah} onChange={(v) => patch(p.id, "price_per_cm_uah", Number(v))} />
+                  {sizesFor(p.pet).map((o) => {
+                    const sz = sizeById(o.sizeId)!;
+                    return (
+                      <Cell
+                        key={o.sizeId}
+                        label={`${o.label_uk} · ${sz.length}×${sz.width}×${sz.height}, грн`}
+                        type="number"
+                        value={p.prices?.[o.sizeId] ?? 0}
+                        onChange={(v) => patchPrice(p.id, o.sizeId, v)}
+                      />
+                    );
+                  })}
                   <Cell label="Порядок" type="number" value={p.sort} onChange={(v) => patch(p.id, "sort", Number(v))} />
 
                   <div className="field" style={{ marginBottom: 12 }}>
@@ -474,7 +487,7 @@ export default function AdminPage() {
                   <th>E-mail</th>
                   <th>Тварина</th>
                   <th>Модель</th>
-                  <th>Розмір</th>
+                  <th>Корпус</th>
                   <th>Нанесення</th>
                   <th>Разом</th>
                   <th>Відділення</th>
@@ -483,7 +496,6 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {orders.map((o) => {
-                  const cat = categoryById(o.category_id);
                   const eng = o.engraving;
                   return (
                     <tr key={o.id}>
@@ -501,11 +513,13 @@ export default function AdminPage() {
                       <td>{o.email}</td>
                       <td>
                         {PET_LABEL[o.pet]}, {o.weight_kg} кг
-                        {cat && <div className="muted">{cat.label_uk}</div>}
                       </td>
                       <td>{o.item.product_name}</td>
                       <td style={{ whiteSpace: "nowrap" }}>
-                        {o.item.length_cm}×{o.item.width_cm}×{o.item.height_cm}
+                        {o.item.size_code}
+                        <div className="muted">
+                          {o.item.length_cm}×{o.item.width_cm}×{o.item.height_cm}
+                        </div>
                       </td>
                       <td>
                         {eng && eng.ids.length ? (

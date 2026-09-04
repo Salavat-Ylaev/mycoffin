@@ -9,11 +9,10 @@
     "material_en": "Oak, lacquer, gold-finished hardware",
     "desc_uk": "Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
     "desc_en": "A classic silhouette in warm wood, lined with soft ivory cloth.",
-    "min_length_cm": 34,
-    "max_length_cm": 70,
-    "base_price_uah": 3200,
-    "base_length_cm": 48,
-    "price_per_cm_uah": 55,
+    "prices": {
+      "s3": 4150,
+      "s4": 4700
+    },
     "in_stock": true,
     "image": "",
     "art": "classic"
@@ -28,11 +27,10 @@
     "material_en": "MDF, matte white enamel",
     "desc_uk": "Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
     "desc_en": "Clean lines, no ornament. Matte white surface, concealed hardware.",
-    "min_length_cm": 34,
-    "max_length_cm": 70,
-    "base_price_uah": 2400,
-    "base_length_cm": 48,
-    "price_per_cm_uah": 42,
+    "prices": {
+      "s3": 3100,
+      "s4": 3550
+    },
     "in_stock": true,
     "image": "",
     "art": "minimal"
@@ -47,11 +45,10 @@
     "material_en": "Ash, matte black enamel",
     "desc_uk": "Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
     "desc_en": "A deep black body with a thin gold rule around the lid.",
-    "min_length_cm": 38,
-    "max_length_cm": 70,
-    "base_price_uah": 3600,
-    "base_length_cm": 48,
-    "price_per_cm_uah": 60,
+    "prices": {
+      "s3": 4600,
+      "s4": 5200
+    },
     "in_stock": true,
     "image": "",
     "art": "noir"
@@ -66,11 +63,10 @@
     "material_en": "White enamel, gold engraving",
     "desc_uk": "Біла емаль із гравіюванням імені та дат сусальним золотом.",
     "desc_en": "White enamel with the name and dates engraved in gold leaf.",
-    "min_length_cm": 34,
-    "max_length_cm": 66,
-    "base_price_uah": 4200,
-    "base_length_cm": 48,
-    "price_per_cm_uah": 70,
+    "prices": {
+      "s3": 5400,
+      "s4": 6100
+    },
     "in_stock": true,
     "image": "",
     "art": "goldline"
@@ -85,11 +81,10 @@
     "material_en": "Birch plywood, linen, unlacquered",
     "desc_uk": "Біорозкладна модель для поховання в землю. Натуральні матеріали.",
     "desc_en": "A biodegradable model for burial. Natural materials only.",
-    "min_length_cm": 34,
-    "max_length_cm": 70,
-    "base_price_uah": 1800,
-    "base_length_cm": 48,
-    "price_per_cm_uah": 32,
+    "prices": {
+      "s3": 2350,
+      "s4": 2650
+    },
     "in_stock": true,
     "image": "",
     "art": "eco"
@@ -104,11 +99,11 @@
     "material_en": "Oak, lacquer, gold-finished hardware",
     "desc_uk": "Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
     "desc_en": "A classic silhouette in warm wood, lined with soft ivory cloth.",
-    "min_length_cm": 32,
-    "max_length_cm": 120,
-    "base_price_uah": 5200,
-    "base_length_cm": 70,
-    "price_per_cm_uah": 60,
+    "prices": {
+      "s3": 4900,
+      "s6": 7000,
+      "s7": 9100
+    },
     "in_stock": true,
     "image": "",
     "art": "classic"
@@ -123,11 +118,11 @@
     "material_en": "MDF, matte white enamel",
     "desc_uk": "Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
     "desc_en": "Clean lines, no ornament. Matte white surface, concealed hardware.",
-    "min_length_cm": 32,
-    "max_length_cm": 120,
-    "base_price_uah": 4100,
-    "base_length_cm": 70,
-    "price_per_cm_uah": 48,
+    "prices": {
+      "s3": 3850,
+      "s6": 5550,
+      "s7": 7200
+    },
     "in_stock": true,
     "image": "",
     "art": "minimal"
@@ -142,11 +137,11 @@
     "material_en": "Ash, matte black enamel",
     "desc_uk": "Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
     "desc_en": "A deep black body with a thin gold rule around the lid.",
-    "min_length_cm": 40,
-    "max_length_cm": 130,
-    "base_price_uah": 5900,
-    "base_length_cm": 70,
-    "price_per_cm_uah": 66,
+    "prices": {
+      "s3": 5550,
+      "s6": 7900,
+      "s7": 10200
+    },
     "in_stock": true,
     "image": "",
     "art": "noir"
@@ -161,11 +156,11 @@
     "material_en": "White enamel, gold engraving",
     "desc_uk": "Біла емаль із гравіюванням імені та дат сусальним золотом.",
     "desc_en": "White enamel with the name and dates engraved in gold leaf.",
-    "min_length_cm": 32,
-    "max_length_cm": 110,
-    "base_price_uah": 6800,
-    "base_length_cm": 70,
-    "price_per_cm_uah": 78,
+    "prices": {
+      "s3": 6400,
+      "s6": 9150,
+      "s7": 11850
+    },
     "in_stock": true,
     "image": "",
     "art": "goldline"
@@ -180,11 +175,11 @@
     "material_en": "Birch plywood, linen, unlacquered",
     "desc_uk": "Біорозкладна модель для поховання в землю. Натуральні матеріали.",
     "desc_en": "A biodegradable model for burial. Natural materials only.",
-    "min_length_cm": 32,
-    "max_length_cm": 120,
-    "base_price_uah": 3200,
-    "base_length_cm": 70,
-    "price_per_cm_uah": 36,
+    "prices": {
+      "s3": 3000,
+      "s6": 4300,
+      "s7": 5550
+    },
     "in_stock": true,
     "image": "",
     "art": "eco"
@@ -199,11 +194,10 @@
     "material_en": "Oak, lacquer, gold-finished hardware",
     "desc_uk": "Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
     "desc_en": "A classic silhouette in warm wood, lined with soft ivory cloth.",
-    "min_length_cm": 24,
-    "max_length_cm": 100,
-    "base_price_uah": 2600,
-    "base_length_cm": 45,
-    "price_per_cm_uah": 48,
+    "prices": {
+      "s2": 2850,
+      "s5": 5000
+    },
     "in_stock": true,
     "image": "",
     "art": "classic"
@@ -218,11 +212,10 @@
     "material_en": "MDF, matte white enamel",
     "desc_uk": "Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
     "desc_en": "Clean lines, no ornament. Matte white surface, concealed hardware.",
-    "min_length_cm": 24,
-    "max_length_cm": 100,
-    "base_price_uah": 2000,
-    "base_length_cm": 45,
-    "price_per_cm_uah": 38,
+    "prices": {
+      "s2": 2200,
+      "s5": 3900
+    },
     "in_stock": true,
     "image": "",
     "art": "minimal"
@@ -237,11 +230,10 @@
     "material_en": "Ash, matte black enamel",
     "desc_uk": "Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
     "desc_en": "A deep black body with a thin gold rule around the lid.",
-    "min_length_cm": 24,
-    "max_length_cm": 110,
-    "base_price_uah": 2900,
-    "base_length_cm": 45,
-    "price_per_cm_uah": 52,
+    "prices": {
+      "s2": 3150,
+      "s5": 5500
+    },
     "in_stock": true,
     "image": "",
     "art": "noir"
@@ -256,11 +248,10 @@
     "material_en": "White enamel, gold engraving",
     "desc_uk": "Біла емаль із гравіюванням імені та дат сусальним золотом.",
     "desc_en": "White enamel with the name and dates engraved in gold leaf.",
-    "min_length_cm": 24,
-    "max_length_cm": 90,
-    "base_price_uah": 3400,
-    "base_length_cm": 45,
-    "price_per_cm_uah": 62,
+    "prices": {
+      "s2": 3700,
+      "s5": 6500
+    },
     "in_stock": true,
     "image": "",
     "art": "goldline"
@@ -275,11 +266,10 @@
     "material_en": "Birch plywood, linen, unlacquered",
     "desc_uk": "Біорозкладна модель для поховання в землю. Натуральні матеріали.",
     "desc_en": "A biodegradable model for burial. Natural materials only.",
-    "min_length_cm": 24,
-    "max_length_cm": 100,
-    "base_price_uah": 1500,
-    "base_length_cm": 45,
-    "price_per_cm_uah": 28,
+    "prices": {
+      "s2": 1650,
+      "s5": 2900
+    },
     "in_stock": true,
     "image": "",
     "art": "eco"
@@ -294,11 +284,10 @@
     "material_en": "Oak, lacquer, gold-finished hardware",
     "desc_uk": "Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
     "desc_en": "A classic silhouette in warm wood, lined with soft ivory cloth.",
-    "min_length_cm": 18,
-    "max_length_cm": 40,
-    "base_price_uah": 1600,
-    "base_length_cm": 24,
-    "price_per_cm_uah": 40,
+    "prices": {
+      "s1": 1650,
+      "s2": 2650
+    },
     "in_stock": true,
     "image": "",
     "art": "classic"
@@ -313,11 +302,10 @@
     "material_en": "MDF, matte white enamel",
     "desc_uk": "Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
     "desc_en": "Clean lines, no ornament. Matte white surface, concealed hardware.",
-    "min_length_cm": 18,
-    "max_length_cm": 40,
-    "base_price_uah": 1200,
-    "base_length_cm": 24,
-    "price_per_cm_uah": 32,
+    "prices": {
+      "s1": 1250,
+      "s2": 2050
+    },
     "in_stock": true,
     "image": "",
     "art": "minimal"
@@ -332,11 +320,10 @@
     "material_en": "Ash, matte black enamel",
     "desc_uk": "Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
     "desc_en": "A deep black body with a thin gold rule around the lid.",
-    "min_length_cm": 18,
-    "max_length_cm": 40,
-    "base_price_uah": 1800,
-    "base_length_cm": 24,
-    "price_per_cm_uah": 45,
+    "prices": {
+      "s1": 1850,
+      "s2": 2950
+    },
     "in_stock": true,
     "image": "",
     "art": "noir"
@@ -351,11 +338,10 @@
     "material_en": "White enamel, gold engraving",
     "desc_uk": "Біла емаль із гравіюванням імені та дат сусальним золотом.",
     "desc_en": "White enamel with the name and dates engraved in gold leaf.",
-    "min_length_cm": 18,
-    "max_length_cm": 36,
-    "base_price_uah": 2200,
-    "base_length_cm": 24,
-    "price_per_cm_uah": 55,
+    "prices": {
+      "s1": 2250,
+      "s2": 3650
+    },
     "in_stock": true,
     "image": "",
     "art": "goldline"
@@ -370,11 +356,10 @@
     "material_en": "Birch plywood, linen, unlacquered",
     "desc_uk": "Біорозкладна модель для поховання в землю. Натуральні матеріали.",
     "desc_en": "A biodegradable model for burial. Natural materials only.",
-    "min_length_cm": 18,
-    "max_length_cm": 40,
-    "base_price_uah": 900,
-    "base_length_cm": 24,
-    "price_per_cm_uah": 22,
+    "prices": {
+      "s1": 900,
+      "s2": 1450
+    },
     "in_stock": true,
     "image": "",
     "art": "eco"

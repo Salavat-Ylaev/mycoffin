@@ -1,10 +1,30 @@
-// Генерує data/products.json — стартовий каталог: 5 моделей на кожен тип тварини.
+// Генерує data/products.json — стартовий каталог під стандартні корпуси.
+// 5 моделей × 4 типи тварин, у кожної моделі ціна за кожен корпус свого виду.
 // Запуск:  node scripts/generate-seed.mjs
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+/** Стандартні корпуси — має збігатися з SIZES у lib/calc.ts */
+const SIZES = {
+  s1: 25,
+  s2: 50,
+  s3: 65,
+  s4: 75,
+  s5: 95,
+  s6: 100,
+  s7: 135,
+};
+
+/** Які корпуси доступні кожному виду */
+const PET_SIZES = {
+  cat: ["s3", "s4"],
+  dog: ["s3", "s6", "s7"],
+  reptile: ["s2", "s5"],
+  rodent: ["s1", "s2"],
+};
 
 const MODELS = [
   {
@@ -59,53 +79,31 @@ const MODELS = [
   },
 ];
 
-const PETS = {
-  cat: {
-    base_length_cm: 48,
-    variants: {
-      classic: [34, 70, 3200, 55],
-      minimal: [34, 70, 2400, 42],
-      noir: [38, 70, 3600, 60],
-      goldline: [34, 66, 4200, 70],
-      eco: [34, 70, 1800, 32],
-    },
-  },
-  dog: {
-    base_length_cm: 70,
-    variants: {
-      classic: [32, 120, 5200, 60],
-      minimal: [32, 120, 4100, 48],
-      noir: [40, 130, 5900, 66],
-      goldline: [32, 110, 6800, 78],
-      eco: [32, 120, 3200, 36],
-    },
-  },
-  reptile: {
-    base_length_cm: 45,
-    variants: {
-      classic: [24, 100, 2600, 48],
-      minimal: [24, 100, 2000, 38],
-      noir: [24, 110, 2900, 52],
-      goldline: [24, 90, 3400, 62],
-      eco: [24, 100, 1500, 28],
-    },
-  },
-  rodent: {
-    base_length_cm: 24,
-    variants: {
-      classic: [18, 40, 1600, 40],
-      minimal: [18, 40, 1200, 32],
-      noir: [18, 40, 1800, 45],
-      goldline: [18, 36, 2200, 55],
-      eco: [18, 40, 900, 22],
-    },
-  },
+/**
+ * Стартовий прайс. Рахується від опорної довжини та надбавки за сантиметр —
+ * але це лише щоб згенерувати перші числа. Далі ціни живуть в адмінці
+ * і правляться руками, формула більше ніде не використовується.
+ */
+const PRICING = {
+  cat: { baseLength: 48, models: { classic: [3200, 55], minimal: [2400, 42], noir: [3600, 60], goldline: [4200, 70], eco: [1800, 32] } },
+  dog: { baseLength: 70, models: { classic: [5200, 60], minimal: [4100, 48], noir: [5900, 66], goldline: [6800, 78], eco: [3200, 36] } },
+  reptile: { baseLength: 45, models: { classic: [2600, 48], minimal: [2000, 38], noir: [2900, 52], goldline: [3400, 62], eco: [1500, 28] } },
+  rodent: { baseLength: 24, models: { classic: [1600, 40], minimal: [1200, 32], noir: [1800, 45], goldline: [2200, 55], eco: [900, 22] } },
+};
+
+const priceFor = (pet, modelKey, sizeId) => {
+  const cfg = PRICING[pet];
+  const [base, perCm] = cfg.models[modelKey];
+  const raw = base + (SIZES[sizeId] - cfg.baseLength) * perCm;
+  return Math.max(Math.round(raw / 50) * 50, Math.round((base * 0.6) / 50) * 50);
 };
 
 const products = [];
-for (const [pet, cfg] of Object.entries(PETS)) {
+for (const [pet, sizeIds] of Object.entries(PET_SIZES)) {
   MODELS.forEach((m, i) => {
-    const [min, max, base, perCm] = cfg.variants[m.key];
+    const prices = {};
+    for (const sizeId of sizeIds) prices[sizeId] = priceFor(pet, m.key, sizeId);
+
     products.push({
       id: `${pet}-${m.key}`,
       pet,
@@ -116,11 +114,7 @@ for (const [pet, cfg] of Object.entries(PETS)) {
       material_en: m.material_en,
       desc_uk: m.desc_uk,
       desc_en: m.desc_en,
-      min_length_cm: min,
-      max_length_cm: max,
-      base_price_uah: base,
-      base_length_cm: cfg.base_length_cm,
-      price_per_cm_uah: perCm,
+      prices,
       in_stock: true,
       image: "",
       art: m.art,

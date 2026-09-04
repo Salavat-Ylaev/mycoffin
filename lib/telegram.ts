@@ -1,4 +1,3 @@
-import { categoryById } from "./calc";
 import type { Order } from "./types";
 
 const PET_LABEL: Record<string, string> = {
@@ -11,7 +10,6 @@ const PET_LABEL: Record<string, string> = {
 const money = (n: number) => `${n.toLocaleString("uk-UA")} грн`;
 
 export function orderToText(o: Order): string {
-  const cat = categoryById(o.category_id);
   const hasEngraving = Boolean(o.engraving && o.engraving.ids.length);
   const needsTime = Boolean(hasEngraving || o.item.custom_size);
 
@@ -19,10 +17,9 @@ export function orderToText(o: Order): string {
     `🕯 НОВЕ ЗАМОВЛЕННЯ №${o.id}`,
     ``,
     `Тварина: ${PET_LABEL[o.pet] ?? o.pet}, ~${o.weight_kg} кг`,
-    cat ? `Група: ${cat.label_uk} (${cat.examples_uk})` : ``,
     `Модель: ${o.item.product_name}`,
     `Матеріал: ${o.item.material}`,
-    `Розмір (внутр.): ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см`,
+    `Корпус ${o.item.size_code}: ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см (внутр.)`,
     `Труна: ${money(o.item.price_uah)}`,
     hasEngraving
       ? `Нанесення: ${o.engraving.labels.join(", ")} — ${money(o.engraving.price_uah)}` +
@@ -30,7 +27,7 @@ export function orderToText(o: Order): string {
       : `Нанесення: ні`,
     `РАЗОМ: ${money(o.total_uah)}`,
     needsTime
-      ? `Термін: +1–3 дні (${[o.item.custom_size ? "нестандартний розмір" : "", hasEngraving ? "нанесення" : ""].filter(Boolean).join(", ")})`
+      ? `Термін: +1–3 дні (${[o.item.custom_size ? "розмір поза стандартом" : "", hasEngraving ? "нанесення" : ""].filter(Boolean).join(", ")})`
       : `Термін: у наявності, відправка сьогодні`,
     ``,
     `Клієнт: ${o.last_name} ${o.first_name}`,

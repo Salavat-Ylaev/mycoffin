@@ -204,7 +204,7 @@ img{max-width:100%;display:block}
 .offer-media svg{width:100%;height:100%}
 .offer h4{margin:0 0 4px;font-family:var(--display);font-size:18px;font-weight:400}
 .offer-price{margin-top:10px;display:flex;align-items:baseline;
-  justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+  justify-content:space-between;gap:10px;white-space:nowrap;font-variant-numeric:tabular-nums}
 
 .notice{border-left:2px solid var(--gold);background:var(--paper-2);padding:14px 16px;
   font-size:13px;line-height:1.7;margin:18px 0}
@@ -309,59 +309,83 @@ const MODELS = [
    den:"A biodegradable model for burial. Natural materials only."}
 ];
 
-const PETS = {
-  cat:{base:48,v:{classic:[34,70,3200,55],minimal:[34,70,2400,42],noir:[38,70,3600,60],goldline:[34,66,4200,70],eco:[34,70,1800,32]}},
-  dog:{base:70,v:{classic:[32,120,5200,60],minimal:[32,120,4100,48],noir:[40,130,5900,66],goldline:[32,110,6800,78],eco:[32,120,3200,36]}},
-  reptile:{base:45,v:{classic:[24,100,2600,48],minimal:[24,100,2000,38],noir:[24,110,2900,52],goldline:[24,90,3400,62],eco:[24,100,1500,28]}},
-  rodent:{base:24,v:{classic:[18,40,1600,40],minimal:[18,40,1200,32],noir:[18,40,1800,45],goldline:[18,36,2200,55],eco:[18,40,900,22]}}
+const SIZES = {
+  s1:{code:"C1",L:25,W:15,H:10},
+  s2:{code:"C2",L:50,W:25,H:20},
+  s3:{code:"C3",L:65,W:30,H:25},
+  s4:{code:"C4",L:75,W:35,H:30},
+  s5:{code:"C5",L:95,W:25,H:20},
+  s6:{code:"C6",L:100,W:45,H:40},
+  s7:{code:"C7",L:135,W:60,H:55}
+};
+
+const PET_SIZES = [
+  {pet:"cat",sizeId:"s3",uk:"Стандарт",en:"Standard",
+   exuk:"до 5 кг · більшість порід",exen:"up to 5 kg · most breeds",max:5},
+  {pet:"cat",sizeId:"s4",uk:"Максі",en:"Maxi",
+   exuk:"5–12 кг · мейн-кун, рагдол",exen:"5–12 kg · maine coon, ragdoll",max:12},
+
+  {pet:"dog",sizeId:"s3",uk:"Мала порода",en:"Small breed",
+   exuk:"до 10 кг · чихуахуа, той, йорк, шпіц",exen:"up to 10 kg · chihuahua, toy, yorkie",max:10},
+  {pet:"dog",sizeId:"s6",uk:"Середня порода",en:"Medium breed",
+   exuk:"10–35 кг · бігль, кокер, лабрадор",exen:"10–35 kg · beagle, cocker, labrador",max:35},
+  {pet:"dog",sizeId:"s7",uk:"Велика порода",en:"Large breed",
+   exuk:"35–90 кг · вівчарка, ротвейлер, алабай",exen:"35–90 kg · shepherd, rottweiler",max:90},
+
+  {pet:"reptile",sizeId:"s2",uk:"Мала",en:"Small",
+   exuk:"до 1 кг · гекон, ящірка, дрібна змія",exen:"up to 1 kg · gecko, lizard, small snake",max:1},
+  {pet:"reptile",sizeId:"s5",uk:"Велика",en:"Large",
+   exuk:"1–8 кг · агама, черепаха, пітон, ігуана",exen:"1–8 kg · dragon, tortoise, python",max:8},
+
+  {pet:"rodent",sizeId:"s1",uk:"Мала",en:"Small",
+   exuk:"до 500 г · хом'як, миша, щур, піщанка",exen:"up to 500 g · hamster, mouse, rat",max:0.5},
+  {pet:"rodent",sizeId:"s2",uk:"Велика",en:"Large",
+   exuk:"0,5–4 кг · свинка, шиншила, кролик, тхір",exen:"0.5–4 kg · guinea pig, chinchilla, rabbit",max:4}
+];
+
+const sizesFor = pet => PET_SIZES.filter(o => o.pet === pet);
+const maxStandard = pet => sizesFor(pet).slice(-1)[0].max;
+
+function sizeForWeight(pet, kg) {
+  const list = sizesFor(pet);
+  const found = list.find(o => kg <= o.max);
+  return found ? {option:found, custom:false} : {option:list[list.length-1], custom:true};
+}
+
+/* прайс: корпус × модель, по видах */
+const PRICES = {
+  cat:{classic:{s3:4150,s4:4700},minimal:{s3:3100,s4:3550},noir:{s3:4600,s4:5200},
+       goldline:{s3:5400,s4:6100},eco:{s3:2350,s4:2650}},
+  dog:{classic:{s3:4900,s6:7000,s7:9100},minimal:{s3:3850,s6:5550,s7:7200},
+       noir:{s3:5550,s6:7900,s7:10200},goldline:{s3:6400,s6:9150,s7:11850},
+       eco:{s3:3000,s6:4300,s7:5550}},
+  reptile:{classic:{s2:2850,s5:5000},minimal:{s2:2200,s5:3900},noir:{s2:3150,s5:5500},
+           goldline:{s2:3700,s5:6500},eco:{s2:1650,s5:2900}},
+  rodent:{classic:{s1:1650,s2:2650},minimal:{s1:1250,s2:2050},noir:{s1:1850,s2:2950},
+          goldline:{s1:2250,s2:3650},eco:{s1:900,s2:1450}}
 };
 
 const PRODUCTS = [];
-for (const pet of Object.keys(PETS)) {
+for (const pet of ["cat","dog","reptile","rodent"]) {
   MODELS.forEach((m, i) => {
-    const [min, max, base, perCm] = PETS[pet].v[m.key];
     PRODUCTS.push({
       id: pet + "-" + m.key, pet, sort: i + 1, art: m.art,
       name_uk: m.uk, name_en: m.en, material_uk: m.muk, material_en: m.men,
       desc_uk: m.duk, desc_en: m.den,
-      min_length_cm: min, max_length_cm: max,
-      base_price_uah: base, base_length_cm: PETS[pet].base, price_per_cm_uah: perCm,
+      prices: PRICES[pet][m.key],
       in_stock: true
     });
   });
 }
 
-/* ─────────────────────── розмірні групи ─────────────────────── */
+const priceOf = (p, sizeId) => Number(p.prices[sizeId] || 0);
 
-const CATEGORIES = [
-  {id:"cat-standard",pet:"cat",uk:"Кіт",en:"Cat",
-   exuk:"до 5 кг · більшість порід",exen:"up to 5 kg · most breeds",ref:4.5},
-  {id:"cat-large",pet:"cat",uk:"Великий кіт",en:"Large cat",
-   exuk:"5–10 кг · мейн-кун, рагдол",exen:"5–10 kg · maine coon, ragdoll",ref:7},
-
-  {id:"dog-small",pet:"dog",uk:"Мала порода",en:"Small breed",
-   exuk:"до 10 кг · чихуахуа, той, йорк, шпіц",exen:"up to 10 kg · chihuahua, toy, yorkie",ref:5},
-  {id:"dog-medium",pet:"dog",uk:"Середня порода",en:"Medium breed",
-   exuk:"10–25 кг · бігль, кокер, шнауцер",exen:"10–25 kg · beagle, cocker, schnauzer",ref:17},
-  {id:"dog-large",pet:"dog",uk:"Велика порода",en:"Large breed",
-   exuk:"25–60 кг · лабрадор, вівчарка, ротвейлер",exen:"25–60 kg · labrador, shepherd, rottweiler",ref:38},
-
-  {id:"reptile-small",pet:"reptile",uk:"Дрібні",en:"Small",
-   exuk:"до 300 г · гекон, ящірка, дрібна змія",exen:"up to 300 g · gecko, lizard, small snake",ref:0.15},
-  {id:"reptile-medium",pet:"reptile",uk:"Середні",en:"Medium",
-   exuk:"0,3–3 кг · агама, черепаха, полоз",exen:"0.3–3 kg · bearded dragon, tortoise",ref:1.2},
-  {id:"reptile-large",pet:"reptile",uk:"Великі",en:"Large",
-   exuk:"3–20 кг · ігуана, пітон, велика черепаха",exen:"3–20 kg · iguana, python, large tortoise",ref:8},
-
-  {id:"rodent-small",pet:"rodent",uk:"Дрібні",en:"Small",
-   exuk:"до 500 г · хом'як, миша, щур, піщанка",exen:"up to 500 g · hamster, mouse, rat, gerbil",ref:0.25},
-  {id:"rodent-medium",pet:"rodent",uk:"Середні",en:"Medium",
-   exuk:"0,5–1,5 кг · морська свинка, шиншила, дегу",exen:"0.5–1.5 kg · guinea pig, chinchilla, degu",ref:0.8},
-  {id:"rodent-large",pet:"rodent",uk:"Великі",en:"Large",
-   exuk:"1,5–5 кг · кролик, тхір",exen:"1.5–5 kg · rabbit, ferret",ref:2.5}
-];
-
-const catsFor = pet => CATEGORIES.filter(c => c.pet === pet);
+function pickOffers(pet, sizeId, custom) {
+  return PRODUCTS
+    .filter(p => p.pet === pet && p.in_stock && priceOf(p, sizeId) > 0)
+    .sort((a,b) => a.sort - b.sort)
+    .map(p => ({product:p, price:priceOf(p, sizeId), custom:!!custom}));
+}
 
 /* ─────────────────────── нанесення ─────────────────────── */
 
@@ -375,45 +399,6 @@ const ENGRAVING = [
   {id:"verse",uk:"Посмертний вірш",en:"Epitaph",
    huk:"Кілька рядків на ваш вибір або наш текст",hen:"A few lines of your choice, or ours",price:500,needsText:true}
 ];
-
-/* ─────────────────────── розрахунок ─────────────────────── */
-
-const SHAPES = {
-  cat:{k:28.5,w:.42,h:.34,margin:.14,min:[34,18,15],weight:[.3,15]},
-  dog:{k:26,w:.44,h:.38,margin:.14,min:[32,18,15],weight:[.5,90]},
-  reptile:{k:41,w:.26,h:.2,margin:.12,min:[24,12,9],weight:[.05,40]},
-  rodent:{k:23,w:.46,h:.38,margin:.16,min:[18,11,9],weight:[.02,12]}
-};
-
-const up5 = n => Math.ceil(n / 5) * 5;
-
-function calcDimensions(pet, kg) {
-  const s = SHAPES[pet];
-  const w = Math.min(Math.max(kg, s.weight[0]), s.weight[1]);
-  const raw = Math.max(s.k * Math.cbrt(w) * (1 + s.margin), s.min[0]);
-  return {
-    length: up5(raw),
-    width:  up5(Math.max(raw * s.w, s.min[1])),
-    height: up5(Math.max(raw * s.h, s.min[2]))
-  };
-}
-
-const dimsForCategory = c => calcDimensions(c.pet, c.ref);
-
-function priceFor(p, length) {
-  const raw = p.base_price_uah + (length - p.base_length_cm) * p.price_per_cm_uah;
-  return Math.max(Math.round(raw / 50) * 50, Math.round(p.base_price_uah * .6));
-}
-
-function pickOffers(pet, dims, limit) {
-  const pool = PRODUCTS.filter(p => p.pet === pet && p.in_stock).sort((a,b) => a.sort - b.sort);
-  const fits = pool.filter(p => dims.length >= p.min_length_cm && dims.length <= p.max_length_cm);
-  const dist = p => dims.length < p.min_length_cm ? p.min_length_cm - dims.length
-                  : dims.length > p.max_length_cm ? dims.length - p.max_length_cm : 0;
-  const rest = pool.filter(p => !fits.includes(p)).sort((a,b) => dist(a) - dist(b));
-  return [...fits, ...rest].slice(0, Math.max(limit, 2))
-    .map(p => ({ product: p, price: priceFor(p, dims.length), exactFit: fits.includes(p) }));
-}
 
 /* ─────────────────────── ілюстрації ─────────────────────── */
 
@@ -519,15 +504,17 @@ const DICT = {
     comfortSign:"Майстерня SPOKIY",catalogTitle:"Каталог",catalogHint:"Гортайте вбік",
     petCat:"Кіт",petDog:"Пес",petReptile:"Рептилія",petRodent:"Гризун",
     inStock:"В наявності",outStock:"Під замовлення",uah:"грн",cm:"см",
-    sizeGroup:"Розмір",typicalSize:"Типовий розмір",orderThis:"Обрати цю модель",
+    sizeGroup:"Розмір",typicalSize:"Внутрішній розмір",orderThis:"Обрати цю модель",
     calcTitle:"Прорахувати труну",
     step1:"Крок 1 · Ваш улюбленець",step2:"Крок 2 · Варіанти",step3:"Крок 3 · Замовлення",step4:"Готово",
-    calcPetLabel:"Тип тварини",calcCategoryLabel:"Розмір · порода",
+    calcPetLabel:"Тип тварини",calcCategoryLabel:"Розмір · порода",corpusLabel:"Корпус",
+    calcSizeHint:"Розміри стандартні — так труни завжди є в наявності.",
+    calcOverWeight:"Вага більша за стандартний ряд. Виготовимо індивідуально, ціну підтвердимо при дзвінку.",
     calcWeightExact:"Або вкажіть точну вагу",calcWeightLabel:"приблизна вага, кг",
     calcWeightHint:"Точність до кілограма не потрібна — ми уточнимо при підтвердженні.",
-    calcSubmit:"Розрахувати розмір",calcResultTitle:"Рекомендований внутрішній розмір",
+    calcSubmit:"Розрахувати розмір",calcResultTitle:"Стандартний корпус",
     calcLength:"Довжина",calcWidth:"Ширина",calcHeight:"Висота",
-    calcOffersTitle:"Відповідні моделі",calcExact:"Стандартний розмір · є в наявності",calcCustom:"Індивідуальний розмір · +1–3 дні",
+    calcOffersTitle:"Відповідні моделі",calcExact:"Є в наявності",calcCustom:"Індивідуально · +1–3 дні",
     back:"Назад",choose:"Обрати",
     engravingTitle:"Індивідуальне нанесення",
     engravingSub:"Необов'язково. Додає 1–3 дні до відправки.",
@@ -563,15 +550,17 @@ const DICT = {
     comfortSign:"SPOKIY workshop",catalogTitle:"Catalogue",catalogHint:"Scroll sideways",
     petCat:"Cat",petDog:"Dog",petReptile:"Reptile",petRodent:"Rodent",
     inStock:"In stock",outStock:"Made to order",uah:"UAH",cm:"cm",
-    sizeGroup:"Size",typicalSize:"Typical size",orderThis:"Choose this model",
+    sizeGroup:"Size",typicalSize:"Internal size",orderThis:"Choose this model",
     calcTitle:"Size my casket",
     step1:"Step 1 · Your companion",step2:"Step 2 · Options",step3:"Step 3 · Order",step4:"Done",
-    calcPetLabel:"Animal type",calcCategoryLabel:"Size · breed",
+    calcPetLabel:"Animal type",calcCategoryLabel:"Size · breed",corpusLabel:"Corpus",
+    calcSizeHint:"Sizes are standard — that is how we keep them in stock.",
+    calcOverWeight:"Heavier than our standard range. We'll build it to order and confirm the price by phone.",
     calcWeightExact:"Or enter the exact weight",calcWeightLabel:"approximate weight, kg",
     calcWeightHint:"No need to be exact — we'll confirm when we call you.",
-    calcSubmit:"Calculate the size",calcResultTitle:"Recommended internal size",
+    calcSubmit:"Calculate the size",calcResultTitle:"Standard corpus",
     calcLength:"Length",calcWidth:"Width",calcHeight:"Height",
-    calcOffersTitle:"Matching models",calcExact:"Standard size · in stock",calcCustom:"Custom size · +1–3 days",
+    calcOffersTitle:"Matching models",calcExact:"In stock",calcCustom:"Custom · +1–3 days",
     back:"Back",choose:"Choose",
     engravingTitle:"Personal engraving",
     engravingSub:"Optional. Adds 1–3 days before dispatch.",
@@ -608,9 +597,9 @@ const EMAIL = "hello@spokiy.store";
 /* ─────────────────────── стан ─────────────────────── */
 
 const state = {
-  lang:"uk", pet:"cat", categoryId:"cat-standard",
+  lang:"uk", pet:"cat", sizeId:"s3",
   modal:null, step:1,
-  calcPet:"cat", calcCat:"cat-standard", weight:4.5,
+  calcPet:"cat", calcSize:"s3", weight:5, size:null, overWeight:false,
   dims:null, offers:[], chosenId:null, presetId:null,
   engIds:[], engText:"",
   form:{first_name:"",last_name:"",phone:"",email:"",post_office:"",comment:""},
@@ -631,16 +620,16 @@ const engHint = o => state.lang === "uk" ? o.huk : o.hen;
 const engSelected = () => ENGRAVING.filter(o => state.engIds.includes(o.id));
 const engPrice = () => engSelected().reduce((s,o) => s + o.price, 0);
 const engNeedsText = () => engSelected().some(o => o.needsText);
-const needsExtraDays = offer => state.engIds.length > 0 || (offer ? !offer.exactFit : false);
+const needsExtraDays = () => state.engIds.length > 0 || state.overWeight;
 
 /* ─────────────────────── рендер ─────────────────────── */
 
 function render() {
   const d = L();
   const list = PRODUCTS.filter(p => p.pet === state.pet).sort((a,b) => a.sort - b.sort);
-  const cats = catsFor(state.pet);
-  const cat = cats.find(c => c.id === state.categoryId) || cats[0];
-  const dims = dimsForCategory(cat);
+  const opts = sizesFor(state.pet);
+  const opt = opts.find(o => o.sizeId === state.sizeId) || opts[0];
+  const size = SIZES[opt.sizeId];
 
   document.getElementById("app").innerHTML = `
     <header class="header">
@@ -696,10 +685,11 @@ function render() {
         <div class="sizebar">
           <span class="caps muted sizebar-label">${d.sizeGroup}</span>
           <div class="sizebar-chips">
-            ${cats.map(c => `
-              <button class="size-chip" aria-pressed="${c.id === cat.id}" data-cat="${c.id}">
-                <span class="size-chip-name">${esc(catName(c))}</span>
-                <span class="size-chip-ex">${esc(catEx(c))}</span>
+            ${opts.map(o => `
+              <button class="size-chip" aria-pressed="${o.sizeId === opt.sizeId}" data-size="${o.sizeId}">
+                <span class="size-chip-name">${esc(catName(o))}</span>
+                <span class="size-chip-ex">${esc(catEx(o))}</span>
+                <span class="size-chip-dim">${SIZES[o.sizeId].L}×${SIZES[o.sizeId].W}×${SIZES[o.sizeId].H} см</span>
               </button>`).join("")}
           </div>
         </div>
@@ -715,10 +705,10 @@ function render() {
               <div class="card-material">${esc(matOf(p))}</div>
               <div class="card-material" style="margin-top:-6px">${esc(descOf(p))}</div>
               <div class="card-meta">
-                <span class="caps muted">${d.typicalSize} · ${dims.length}×${dims.width}×${dims.height} ${d.cm}</span>
-                <span class="card-price">${money(priceFor(p, dims.length))} ${d.uah}</span>
+                <span class="caps muted">${d.corpusLabel} ${size.code} · ${size.L}×${size.W}×${size.H} ${d.cm}</span>
+                <span class="card-price">${priceOf(p, opt.sizeId) ? money(priceOf(p, opt.sizeId)) + " " + d.uah : "—"}</span>
               </div>
-              <button class="btn btn-sm card-cta" data-act="calc" data-product="${p.id}" data-petkind="${p.pet}" data-catid="${cat.id}">${d.orderThis}</button>
+              <button class="btn btn-sm card-cta" data-act="calc" data-product="${p.id}" data-petkind="${p.pet}" data-sizeid="${opt.sizeId}">${d.orderThis}</button>
             </article>`).join("")}
         </div>
 
@@ -794,8 +784,7 @@ function calcModal() {
   let body = "";
 
   if (state.step === 1) {
-    const cats = catsFor(state.calcPet);
-    const r = SHAPES[state.calcPet].weight;
+    const opts = sizesFor(state.calcPet);
     body = `
       <div class="field">
         <label>${d.calcPetLabel}</label>
@@ -810,34 +799,36 @@ function calcModal() {
       <div class="field">
         <label>${d.calcCategoryLabel}</label>
         <div class="cat-picker">
-          ${cats.map(c => `
-            <button class="cat-option" aria-pressed="${c.id === state.calcCat}" data-calccat="${c.id}">
-              <span class="cat-name">${esc(catName(c))}</span>
-              <span class="cat-ex">${esc(catEx(c))}</span>
+          ${opts.map(o => `
+            <button class="cat-option" aria-pressed="${o.sizeId === state.calcSize}" data-calcsize="${o.sizeId}">
+              <span class="cat-name">${esc(catName(o))}<span class="cat-dim">${SIZES[o.sizeId].L}×${SIZES[o.sizeId].W}×${SIZES[o.sizeId].H} см</span></span>
+              <span class="cat-ex">${esc(catEx(o))}</span>
             </button>`).join("")}
         </div>
+        <div class="caps muted" style="margin-top:10px;letter-spacing:.08em">${d.calcSizeHint}</div>
       </div>
 
       <div class="field">
         <label>${d.calcWeightExact} · ${d.calcWeightLabel}</label>
-        <input type="number" id="weight" min="${r[0]}" max="${r[1]}" step="0.1" value="${state.weight}">
+        <input type="number" id="weight" min="0.02" max="${maxStandard(state.calcPet)*2}" step="0.1" value="${state.weight}">
         <div class="caps muted" style="margin-top:10px;letter-spacing:.08em">${d.calcWeightHint}</div>
       </div>
       ${state.error ? `<div class="error">${state.error}</div>` : ""}
       <button class="btn btn-solid" style="width:100%;margin-top:12px" data-act="calculate">${d.calcSubmit}</button>`;
   }
 
-  if (state.step === 2 && state.dims) {
-    const dim = state.dims;
+  if (state.step === 2 && state.size) {
+    const sz = state.size;
     body = `
       <div class="result-box">
-        <div class="caps muted">${d.calcResultTitle}</div>
+        <div class="caps muted">${d.calcResultTitle} · ${sz.code}</div>
         <div class="result-dims">
-          <div><span class="caps muted">${d.calcLength}</span><strong>${dim.length}</strong><span class="caps muted">${d.cm}</span></div>
-          <div><span class="caps muted">${d.calcWidth}</span><strong>${dim.width}</strong><span class="caps muted">${d.cm}</span></div>
-          <div><span class="caps muted">${d.calcHeight}</span><strong>${dim.height}</strong><span class="caps muted">${d.cm}</span></div>
+          <div><span class="caps muted">${d.calcLength}</span><strong>${sz.L}</strong><span class="caps muted">${d.cm}</span></div>
+          <div><span class="caps muted">${d.calcWidth}</span><strong>${sz.W}</strong><span class="caps muted">${d.cm}</span></div>
+          <div><span class="caps muted">${d.calcHeight}</span><strong>${sz.H}</strong><span class="caps muted">${d.cm}</span></div>
         </div>
       </div>
+      ${state.overWeight ? `<div class="notice">${d.calcOverWeight}</div>` : ""}
       <div class="caps muted" style="margin-bottom:14px">${d.calcOffersTitle}</div>
       ${state.offers.map(o => `
         <button class="offer" aria-pressed="${state.chosenId === o.product.id}" data-offer="${o.product.id}">
@@ -846,7 +837,7 @@ function calcModal() {
             <h4>${esc(nameOf(o.product))}</h4>
             <div class="muted" style="font-size:12px;line-height:1.6">${esc(matOf(o.product))}</div>
             <div class="offer-price">
-              <span class="caps" style="color:${o.exactFit ? "var(--gold)" : "var(--grey)"}">${o.exactFit ? d.calcExact : d.calcCustom}</span>
+              <span class="caps" style="color:${o.custom ? "var(--grey)" : "var(--gold)"}">${o.custom ? d.calcCustom : d.calcExact}</span>
               <span style="font-size:14px">${money(o.price)} ${d.uah}</span>
             </div>
           </div>
@@ -859,13 +850,13 @@ function calcModal() {
 
   if (state.step === 3 && state.chosenId) {
     const o = state.offers.find(x => x.product.id === state.chosenId);
-    const dim = state.dims;
+    const sz = state.size;
     const f = state.form;
     const ep = engPrice();
     const total = o.price + ep;
     body = `
       <div class="notice">
-        <b>${esc(nameOf(o.product))}</b> · ${dim.length}×${dim.width}×${dim.height} ${d.cm} · ${money(o.price)} ${d.uah}
+        <b>${esc(nameOf(o.product))}</b> · ${d.corpusLabel} ${sz.code} · ${sz.L}×${sz.W}×${sz.H} ${d.cm} · ${money(o.price)} ${d.uah}
       </div>
 
       <div class="addons">
@@ -893,7 +884,7 @@ function calcModal() {
         <div><span class="muted">${d.coffinLabel}</span><span>${money(o.price)} ${d.uah}</span></div>
         ${ep > 0 ? `<div><span class="muted">${d.engravingTitle}</span><span>${money(ep)} ${d.uah}</span></div>` : ""}
         <div class="totals-sum"><span>${d.totalLabel}</span><span>${money(total)} ${d.uah}</span></div>
-        <div class="caps muted totals-lead">${d.leadTitle}: ${needsExtraDays(o) ? d.leadPlus : d.leadBase}</div>
+        <div class="caps muted totals-lead">${d.leadTitle}: ${needsExtraDays() ? d.leadPlus : d.leadBase}</div>
       </div>
 
       <div class="field-row">
@@ -934,7 +925,7 @@ function calcModal() {
         ${PAY_DETAILS}
         <div class="muted" style="margin-top:10px;font-size:12px">${d.donePayHint}</div>
       </div>
-      <div class="caps muted">${d.leadTitle}: ${needsExtraDays(o) ? d.leadPlus : d.leadBase}</div>
+      <div class="caps muted">${d.leadTitle}: ${needsExtraDays() ? d.leadPlus : d.leadBase}</div>
       <div class="notice" style="border-left-color:var(--ink)">
         <span class="caps muted">Demo</span><br>${d.demoNote}
       </div>
@@ -968,7 +959,7 @@ function input(name, label, value, type = "text", placeholder = "") {
 /* ─────────────────────── події ─────────────────────── */
 
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-act],[data-pet],[data-cat],[data-calcpet],[data-calccat],[data-offer],[data-scroll]");
+  const el = e.target.closest("[data-act],[data-pet],[data-size],[data-calcpet],[data-calcsize],[data-offer],[data-scroll]");
 
   if (!el) {
     if (e.target.dataset && e.target.dataset.close) close();
@@ -982,21 +973,21 @@ document.addEventListener("click", e => {
   }
   if (el.dataset.pet) {
     state.pet = el.dataset.pet;
-    state.categoryId = catsFor(state.pet)[0].id;
+    state.sizeId = sizesFor(state.pet)[0].sizeId;
     render(); return;
   }
-  if (el.dataset.cat) { state.categoryId = el.dataset.cat; render(); return; }
+  if (el.dataset.size) { state.sizeId = el.dataset.size; render(); return; }
   if (el.dataset.calcpet) {
     state.calcPet = el.dataset.calcpet;
-    const c = catsFor(state.calcPet)[0];
-    state.calcCat = c.id;
-    state.weight = c.ref;
+    const o = sizesFor(state.calcPet)[0];
+    state.calcSize = o.sizeId;
+    state.weight = o.max;
     render(); return;
   }
-  if (el.dataset.calccat) {
-    const c = CATEGORIES.find(x => x.id === el.dataset.calccat);
-    state.calcCat = c.id;
-    state.weight = c.ref;
+  if (el.dataset.calcsize) {
+    const o = PET_SIZES.find(x => x.pet === state.calcPet && x.sizeId === el.dataset.calcsize);
+    state.calcSize = o.sizeId;
+    state.weight = o.max;
     render(); return;
   }
   if (el.dataset.offer) { state.chosenId = el.dataset.offer; render(); return; }
@@ -1015,9 +1006,10 @@ document.addEventListener("click", e => {
     state.engText = "";
     state.presetId = el.dataset.product || null;
     if (el.dataset.petkind) state.calcPet = el.dataset.petkind;
-    const c = CATEGORIES.find(x => x.id === el.dataset.catid) || catsFor(state.calcPet)[0];
-    state.calcCat = c.id;
-    state.weight = c.ref;
+    const o = PET_SIZES.find(x => x.pet === state.calcPet && x.sizeId === el.dataset.sizeid)
+      || sizesFor(state.calcPet)[0];
+    state.calcSize = o.sizeId;
+    state.weight = o.max;
     render(); return;
   }
 
@@ -1028,8 +1020,11 @@ document.addEventListener("click", e => {
     if (!w || w <= 0) { state.error = L().formRequired; render(); return; }
     state.weight = w;
     state.error = "";
-    state.dims = calcDimensions(state.calcPet, w);
-    state.offers = pickOffers(state.calcPet, state.dims, 4);
+    const r = sizeForWeight(state.calcPet, w);
+    state.calcSize = r.option.sizeId;
+    state.size = SIZES[r.option.sizeId];
+    state.overWeight = r.custom;
+    state.offers = pickOffers(state.calcPet, r.option.sizeId, r.custom);
     const pre = state.presetId && state.offers.find(o => o.product.id === state.presetId);
     state.chosenId = pre ? pre.product.id : null;
     state.step = 2;
@@ -1052,7 +1047,7 @@ document.addEventListener("click", e => {
     state.orderId = String(now.getDate()).padStart(2,"0") + String(now.getMonth()+1).padStart(2,"0")
       + "-" + Math.floor(1000 + Math.random()*9000);
     state.orderTotal = o.price + engPrice();
-    state.orderExtraDays = needsExtraDays(o);
+    state.orderExtraDays = needsExtraDays();
     state.error = "";
     state.step = 4;
     render(); return;

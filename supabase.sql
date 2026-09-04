@@ -16,11 +16,7 @@ create table if not exists public.products (
   desc_uk           text not null default '',
   desc_en           text not null default '',
 
-  min_length_cm     numeric not null default 20,
-  max_length_cm     numeric not null default 60,
-  base_price_uah    numeric not null default 1000,
-  base_length_cm    numeric not null default 40,
-  price_per_cm_uah  numeric not null default 30,
+  prices            jsonb not null default '{}'::jsonb,
 
   in_stock          boolean not null default true,
   image             text not null default '',
@@ -54,15 +50,22 @@ create table if not exists public.orders (
   item         jsonb not null,
   engraving    jsonb not null default '{"ids":[],"labels":[],"text":"","price_uah":0}'::jsonb,
   total_uah    numeric not null default 0,
-  category_id  text not null default '',
   status       text not null default 'new'
 );
+
+-- если products создавалась раньше, со старой ценовой моделью
+alter table public.products add column if not exists prices jsonb not null default '{}'::jsonb;
+alter table public.products drop column if exists min_length_cm;
+alter table public.products drop column if exists max_length_cm;
+alter table public.products drop column if exists base_price_uah;
+alter table public.products drop column if exists base_length_cm;
+alter table public.products drop column if exists price_per_cm_uah;
 
 -- на случай если таблица orders уже была создана раньше, без этих колонок
 alter table public.orders add column if not exists engraving jsonb not null
   default '{"ids":[],"labels":[],"text":"","price_uah":0}'::jsonb;
 alter table public.orders add column if not exists total_uah numeric not null default 0;
-alter table public.orders add column if not exists category_id text not null default '';
+alter table public.orders drop column if exists category_id;
 
 create index if not exists orders_created_at_idx on public.orders (created_at desc);
 create index if not exists products_pet_sort_idx on public.products (pet, sort);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProducts, getEngravingOptions, createOrder } from "@/lib/store";
-import { calcDimensions, categoryForWeight, priceFor } from "@/lib/calc";
+import { sizeForWeight, sizeById, priceOf } from "@/lib/calc";
 import { notifyTelegram } from "@/lib/telegram";
 import { mailOwner, mailCustomer } from "@/lib/mail";
 import { PET_KINDS, type Order, type PetKind } from "@/lib/types";
@@ -62,13 +62,13 @@ export async function POST(req: NextRequest) {
 
     const lang = body.lang === "en" ? "en" : "uk";
 
-    // розміри й ціну рахуємо на сервері — клієнтським даним не довіряємо
-    const dims = calcDimensions(pet, weight);
-    const price = priceFor(product, dims.length);
-
-    // чи потрапляє довжина у штатний діапазон моделі
-    const customSize =
-      dims.length < product.min_length_cm || dims.length > product.max_length_cm;
+    // корпус і ціну визначає сервер за вагою — клієнтським даним не довіряємо
+    const { option, custom: customSize } = sizeForWeight(pet, weight);
+    const size = sizeById(option.sizeId)!;
+    const price = priceOf(product, size.id);
+    if (price <= 0) {
+      return NextResponse.json({ error: "price not set" }, { status: 400 });
+    }
 
     // додаткові послуги теж перевіряємо за нашим прайсом
     const allOptions = await getEngravingOptions();
@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
       pet,
       weight_kg: Math.round(weight * 100) / 100,
-      category_id: clean(body.category_id, 40) || categoryForWeight(pet, weight).id,
       first_name,
       last_name,
       phone,
@@ -103,9 +102,11 @@ export async function POST(req: NextRequest) {
         product_name: lang === "en" ? product.name_en : product.name_uk,
         material: lang === "en" ? product.material_en : product.material_uk,
         price_uah: price,
-        length_cm: dims.length,
-        width_cm: dims.width,
-        height_cm: dims.height,
+        size_id: size.id,
+        size_code: size.code,
+        length_cm: size.length,
+        width_cm: size.width,
+        height_cm: size.height,
         custom_size: customSize,
       },
       engraving: {

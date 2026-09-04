@@ -1,302 +1,208 @@
 import type { PetKind, Product } from "./types";
 
 /**
- * Розрахунок внутрішніх розмірів труни за типом тварини та приблизною вагою.
+ * СТАНДАРТНІ КОРПУСИ
  *
- * Основа: тіло тварини має щільність близьку до 1 кг/л, тож характерна
- * довжина тіла зростає як корінь кубічний з ваги: L = k * ∛вага.
- * Коефіцієнт k підібраний під пропорції кожного виду.
- * Далі додається технологічний запас на підстилку та вільний простір.
+ * Розміри більше не рахуються під кожну тварину окремо — це неможливо
+ * поставити на потік. Замість цього сім стандартних корпусів, які меблевий
+ * цех ріже серіями. Частина корпусів спільна для різних тварин:
+ * кіт до 5 кг і пес до 10 кг лягають в один, великий гризун і дрібна
+ * рептилія — в інший.
  *
- * Усі розміри округлюються ВГОРУ до кратних 5 см:
- * 54×23×19 стає 55×25×20. Так простіше різати матеріал і тримати склад.
+ * Усі розміри — ВНУТРІШНІ, у сантиметрах, кратні 5.
  */
 
-interface Shape {
-  /** коефіцієнт довжини тіла */
-  k: number;
-  /** ширина як частка довжини */
-  widthRatio: number;
-  /** висота як частка довжини */
-  heightRatio: number;
-  /** запас довжини, % */
-  margin: number;
-  /** мінімальні внутрішні розміри, см */
-  min: [number, number, number];
-  /** допустимий діапазон ваги, кг */
-  weight: [number, number];
-  /** типова вага для підказки */
-  defaultWeight: number;
-}
-
-export const SHAPES: Record<PetKind, Shape> = {
-  cat: {
-    k: 28.5,
-    widthRatio: 0.42,
-    heightRatio: 0.34,
-    margin: 0.14,
-    min: [34, 18, 15],
-    weight: [0.3, 15],
-    defaultWeight: 4.5,
-  },
-  dog: {
-    k: 26.0,
-    widthRatio: 0.44,
-    heightRatio: 0.38,
-    margin: 0.14,
-    min: [32, 18, 15],
-    weight: [0.5, 90],
-    defaultWeight: 12,
-  },
-  reptile: {
-    // рептилії видовжені: більша довжина, менша ширина й висота
-    k: 41.0,
-    widthRatio: 0.26,
-    heightRatio: 0.2,
-    margin: 0.12,
-    min: [24, 12, 9],
-    weight: [0.05, 40],
-    defaultWeight: 1.2,
-  },
-  rodent: {
-    k: 23.0,
-    widthRatio: 0.46,
-    heightRatio: 0.38,
-    margin: 0.16,
-    min: [18, 11, 9],
-    weight: [0.02, 12],
-    defaultWeight: 0.35,
-  },
-};
-
-/* ──────────────────── категорії розміру ────────────────────
-   Каталог і калькулятор відштовхуються від цих груп.
-   refWeight — середня вага групи, за нею рахується типовий розмір.
-   ─────────────────────────────────────────────────────────── */
-
-export interface SizeCategory {
+export interface CoffinSize {
   id: string;
-  pet: PetKind;
-  label_uk: string;
-  label_en: string;
-  /** приклади порід / видів */
-  examples_uk: string;
-  examples_en: string;
-  /** діапазон ваги групи, кг */
-  range: [number, number];
-  /** середня вага групи — за нею рахується типовий розмір */
-  refWeight: number;
-}
-
-export const CATEGORIES: SizeCategory[] = [
-  {
-    id: "cat-standard",
-    pet: "cat",
-    label_uk: "Кіт",
-    label_en: "Cat",
-    examples_uk: "до 5 кг · більшість порід",
-    examples_en: "up to 5 kg · most breeds",
-    range: [0.3, 5],
-    refWeight: 4.5,
-  },
-  {
-    id: "cat-large",
-    pet: "cat",
-    label_uk: "Великий кіт",
-    label_en: "Large cat",
-    examples_uk: "5–10 кг · мейн-кун, рагдол",
-    examples_en: "5–10 kg · maine coon, ragdoll",
-    range: [5, 15],
-    refWeight: 7,
-  },
-
-  {
-    id: "dog-small",
-    pet: "dog",
-    label_uk: "Мала порода",
-    label_en: "Small breed",
-    examples_uk: "до 10 кг · чихуахуа, той, йорк, шпіц",
-    examples_en: "up to 10 kg · chihuahua, toy, yorkie, spitz",
-    range: [0.5, 10],
-    refWeight: 5,
-  },
-  {
-    id: "dog-medium",
-    pet: "dog",
-    label_uk: "Середня порода",
-    label_en: "Medium breed",
-    examples_uk: "10–25 кг · бігль, кокер, шнауцер",
-    examples_en: "10–25 kg · beagle, cocker, schnauzer",
-    range: [10, 25],
-    refWeight: 17,
-  },
-  {
-    id: "dog-large",
-    pet: "dog",
-    label_uk: "Велика порода",
-    label_en: "Large breed",
-    examples_uk: "25–60 кг · лабрадор, вівчарка, ротвейлер",
-    examples_en: "25–60 kg · labrador, shepherd, rottweiler",
-    range: [25, 90],
-    refWeight: 38,
-  },
-
-  {
-    id: "reptile-small",
-    pet: "reptile",
-    label_uk: "Дрібні",
-    label_en: "Small",
-    examples_uk: "до 300 г · гекон, ящірка, дрібна змія",
-    examples_en: "up to 300 g · gecko, lizard, small snake",
-    range: [0.05, 0.3],
-    refWeight: 0.15,
-  },
-  {
-    id: "reptile-medium",
-    pet: "reptile",
-    label_uk: "Середні",
-    label_en: "Medium",
-    examples_uk: "0,3–3 кг · агама, черепаха, полоз",
-    examples_en: "0.3–3 kg · bearded dragon, tortoise, rat snake",
-    range: [0.3, 3],
-    refWeight: 1.2,
-  },
-  {
-    id: "reptile-large",
-    pet: "reptile",
-    label_uk: "Великі",
-    label_en: "Large",
-    examples_uk: "3–20 кг · ігуана, пітон, велика черепаха",
-    examples_en: "3–20 kg · iguana, python, large tortoise",
-    range: [3, 40],
-    refWeight: 8,
-  },
-
-  {
-    id: "rodent-small",
-    pet: "rodent",
-    label_uk: "Дрібні",
-    label_en: "Small",
-    examples_uk: "до 500 г · хом'як, миша, щур, піщанка",
-    examples_en: "up to 500 g · hamster, mouse, rat, gerbil",
-    range: [0.02, 0.5],
-    refWeight: 0.25,
-  },
-  {
-    id: "rodent-medium",
-    pet: "rodent",
-    label_uk: "Середні",
-    label_en: "Medium",
-    examples_uk: "0,5–1,5 кг · морська свинка, шиншила, дегу",
-    examples_en: "0.5–1.5 kg · guinea pig, chinchilla, degu",
-    range: [0.5, 1.5],
-    refWeight: 0.8,
-  },
-  {
-    id: "rodent-large",
-    pet: "rodent",
-    label_uk: "Великі",
-    label_en: "Large",
-    examples_uk: "1,5–5 кг · кролик, тхір",
-    examples_en: "1.5–5 kg · rabbit, ferret",
-    range: [1.5, 12],
-    refWeight: 2.5,
-  },
-];
-
-export const categoriesFor = (pet: PetKind) => CATEGORIES.filter((c) => c.pet === pet);
-export const categoryById = (id: string) => CATEGORIES.find((c) => c.id === id);
-
-/** У яку групу потрапляє задана вага */
-export function categoryForWeight(pet: PetKind, kg: number): SizeCategory {
-  const list = categoriesFor(pet);
-  return (
-    list.find((c) => kg >= c.range[0] && kg <= c.range[1]) ??
-    (kg < list[0].range[0] ? list[0] : list[list.length - 1])
-  );
-}
-
-/* ──────────────────── розміри й ціна ──────────────────── */
-
-export interface Dimensions {
+  /** маркування для цеху */
+  code: string;
   length: number;
   width: number;
   height: number;
 }
 
-/** Округлення вгору до кратних 5: 23 → 25, 54 → 55 */
-const up5 = (n: number) => Math.ceil(n / 5) * 5;
+export const SIZES: CoffinSize[] = [
+  { id: "s1", code: "C1", length: 25, width: 15, height: 10 },
+  { id: "s2", code: "C2", length: 50, width: 25, height: 20 },
+  { id: "s3", code: "C3", length: 65, width: 30, height: 25 },
+  { id: "s4", code: "C4", length: 75, width: 35, height: 30 },
+  { id: "s5", code: "C5", length: 95, width: 25, height: 20 },
+  { id: "s6", code: "C6", length: 100, width: 45, height: 40 },
+  { id: "s7", code: "C7", length: 135, width: 60, height: 55 },
+];
 
-export function calcDimensions(pet: PetKind, weightKg: number): Dimensions {
-  const s = SHAPES[pet];
-  const w = Math.min(Math.max(weightKg, s.weight[0]), s.weight[1]);
+export const sizeById = (id: string) => SIZES.find((s) => s.id === id);
 
-  // спершу «сирі» розміри, і лише потім округлення —
-  // інакше похибка накопичується на ширині й висоті
-  const raw = Math.max(s.k * Math.cbrt(w) * (1 + s.margin), s.min[0]);
-
-  return {
-    length: up5(raw),
-    width: up5(Math.max(raw * s.widthRatio, s.min[1])),
-    height: up5(Math.max(raw * s.heightRatio, s.min[2])),
-  };
+/**
+ * Як корпуси розподілені по тваринах.
+ * Порядок у масиві = порядок показу; останній варіант виду — найбільший.
+ */
+export interface PetSize {
+  pet: PetKind;
+  sizeId: string;
+  label_uk: string;
+  label_en: string;
+  examples_uk: string;
+  examples_en: string;
+  /** верхня межа ваги, кг — нижня береться з попереднього варіанта */
+  maxWeight: number;
 }
 
-/** Типовий розмір для групи — те, що показуємо в каталозі */
-export const dimsForCategory = (c: SizeCategory) => calcDimensions(c.pet, c.refWeight);
+export const PET_SIZES: PetSize[] = [
+  {
+    pet: "cat",
+    sizeId: "s3",
+    label_uk: "Стандарт",
+    label_en: "Standard",
+    examples_uk: "до 5 кг · більшість порід",
+    examples_en: "up to 5 kg · most breeds",
+    maxWeight: 5,
+  },
+  {
+    pet: "cat",
+    sizeId: "s4",
+    label_uk: "Максі",
+    label_en: "Maxi",
+    examples_uk: "5–12 кг · мейн-кун, рагдол",
+    examples_en: "5–12 kg · maine coon, ragdoll",
+    maxWeight: 12,
+  },
 
-/** Ціна конкретної моделі під розраховану довжину */
-export function priceFor(product: Product, length: number): number {
-  const raw =
-    product.base_price_uah +
-    (length - product.base_length_cm) * product.price_per_cm_uah;
-  const floor = Math.round(product.base_price_uah * 0.6);
-  return Math.max(Math.round(raw / 50) * 50, floor);
+  {
+    pet: "dog",
+    sizeId: "s3",
+    label_uk: "Мала порода",
+    label_en: "Small breed",
+    examples_uk: "до 10 кг · чихуахуа, той, йорк, шпіц",
+    examples_en: "up to 10 kg · chihuahua, toy, yorkie, spitz",
+    maxWeight: 10,
+  },
+  {
+    pet: "dog",
+    sizeId: "s6",
+    label_uk: "Середня порода",
+    label_en: "Medium breed",
+    examples_uk: "10–35 кг · бігль, кокер, лабрадор",
+    examples_en: "10–35 kg · beagle, cocker, labrador",
+    maxWeight: 35,
+  },
+  {
+    pet: "dog",
+    sizeId: "s7",
+    label_uk: "Велика порода",
+    label_en: "Large breed",
+    examples_uk: "35–90 кг · вівчарка, ротвейлер, алабай",
+    examples_en: "35–90 kg · shepherd, rottweiler, alabai",
+    maxWeight: 90,
+  },
+
+  {
+    pet: "reptile",
+    sizeId: "s2",
+    label_uk: "Мала",
+    label_en: "Small",
+    examples_uk: "до 1 кг · гекон, ящірка, дрібна змія",
+    examples_en: "up to 1 kg · gecko, lizard, small snake",
+    maxWeight: 1,
+  },
+  {
+    pet: "reptile",
+    sizeId: "s5",
+    label_uk: "Велика",
+    label_en: "Large",
+    examples_uk: "1–8 кг · агама, черепаха, пітон, ігуана",
+    examples_en: "1–8 kg · bearded dragon, tortoise, python, iguana",
+    maxWeight: 8,
+  },
+
+  {
+    pet: "rodent",
+    sizeId: "s1",
+    label_uk: "Мала",
+    label_en: "Small",
+    examples_uk: "до 500 г · хом'як, миша, щур, піщанка",
+    examples_en: "up to 500 g · hamster, mouse, rat, gerbil",
+    maxWeight: 0.5,
+  },
+  {
+    pet: "rodent",
+    sizeId: "s2",
+    label_uk: "Велика",
+    label_en: "Large",
+    examples_uk: "0,5–4 кг · свинка, шиншила, кролик, тхір",
+    examples_en: "0.5–4 kg · guinea pig, chinchilla, rabbit, ferret",
+    maxWeight: 4,
+  },
+];
+
+export const sizesFor = (pet: PetKind) => PET_SIZES.filter((s) => s.pet === pet);
+
+export const petSize = (pet: PetKind, sizeId: string) =>
+  PET_SIZES.find((s) => s.pet === pet && s.sizeId === sizeId);
+
+/** Нижня межа варіанта — верхня межа попереднього */
+export function weightRange(ps: PetSize): [number, number] {
+  const list = sizesFor(ps.pet);
+  const i = list.indexOf(ps);
+  return [i === 0 ? 0 : list[i - 1].maxWeight, ps.maxWeight];
 }
+
+/** Максимальна вага, яку закриває стандартний ряд для цього виду */
+export const maxStandardWeight = (pet: PetKind) => {
+  const list = sizesFor(pet);
+  return list[list.length - 1].maxWeight;
+};
+
+/**
+ * Який корпус потрібен для такої ваги.
+ * Якщо тварина важча за весь стандартний ряд — повертаємо найбільший корпус
+ * і прапорець custom: такий заказ рахується індивідуальним (+1–3 дні).
+ */
+export function sizeForWeight(
+  pet: PetKind,
+  kg: number
+): { option: PetSize; custom: boolean } {
+  const list = sizesFor(pet);
+  const found = list.find((s) => kg <= s.maxWeight);
+  return found
+    ? { option: found, custom: false }
+    : { option: list[list.length - 1], custom: true };
+}
+
+/* ──────────────────── ціна ──────────────────── */
+
+/** Ціна моделі під конкретний корпус; 0 — ціну не задано в адмінці */
+export const priceOf = (product: Product, sizeId: string): number =>
+  Number(product.prices?.[sizeId] ?? 0);
 
 export interface Offer {
   product: Product;
   price: number;
-  dims: Dimensions;
-  /** true — модель штатно перекриває цю довжину */
-  exactFit: boolean;
+  size: CoffinSize;
+  /** true — вага поза стандартним рядом, ціну підтверджує менеджер */
+  custom: boolean;
 }
 
-/**
- * Підбір 2–4 моделей під розмір.
- * Спершу ті, що штатно перекривають довжину; якщо їх менше двох —
- * додаємо найближчі за діапазоном (виготовимо індивідуально).
- */
+/** Усі доступні моделі під обраний корпус */
 export function pickOffers(
   products: Product[],
   pet: PetKind,
-  dims: Dimensions,
-  limit = 4
+  sizeId: string,
+  custom = false
 ): Offer[] {
-  const pool = products
-    .filter((p) => p.pet === pet && p.in_stock)
-    .sort((a, b) => a.sort - b.sort);
+  const size = sizeById(sizeId);
+  if (!size) return [];
 
-  const fits = pool.filter(
-    (p) => dims.length >= p.min_length_cm && dims.length <= p.max_length_cm
-  );
-
-  const rest = pool
-    .filter((p) => !fits.includes(p))
-    .sort((a, b) => distance(a, dims.length) - distance(b, dims.length));
-
-  const chosen = [...fits, ...rest].slice(0, Math.max(limit, 2));
-
-  return chosen.map((p) => ({
-    product: p,
-    price: priceFor(p, dims.length),
-    dims,
-    exactFit: fits.includes(p),
-  }));
+  return products
+    .filter((p) => p.pet === pet && p.in_stock && priceOf(p, sizeId) > 0)
+    .sort((a, b) => a.sort - b.sort)
+    .map((p) => ({ product: p, price: priceOf(p, sizeId), size, custom }));
 }
 
-function distance(p: Product, length: number): number {
-  if (length < p.min_length_cm) return p.min_length_cm - length;
-  if (length > p.max_length_cm) return length - p.max_length_cm;
-  return 0;
-}
+/** Найдешевша ціна моделі по всіх корпусах — для картки каталогу */
+export const priceFrom = (product: Product): number => {
+  const values = Object.values(product.prices ?? {})
+    .map(Number)
+    .filter((n) => n > 0);
+  return values.length ? Math.min(...values) : 0;
+};

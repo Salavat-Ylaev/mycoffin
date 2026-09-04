@@ -4,12 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import { t, type Lang } from "@/lib/i18n";
-import {
-  categoriesFor,
-  dimsForCategory,
-  priceFor,
-  type SizeCategory,
-} from "@/lib/calc";
+import { sizesFor, sizeById, priceOf, type PetSize } from "@/lib/calc";
 import CoffinArt from "./CoffinArt";
 import CalculatorModal from "./CalculatorModal";
 import ContactModal from "./ContactModal";
@@ -23,11 +18,11 @@ export default function SiteShell({
 }) {
   const [lang, setLang] = useState<Lang>("uk");
   const [pet, setPet] = useState<PetKind>("cat");
-  const [categoryId, setCategoryId] = useState<string>(categoriesFor("cat")[0].id);
+  const [sizeId, setSizeId] = useState<string>(sizesFor("cat")[0].sizeId);
   const [calcOpen, setCalcOpen] = useState(false);
   const [calcPreset, setCalcPreset] = useState<{
     pet: PetKind;
-    categoryId?: string;
+    sizeId?: string;
     productId?: string;
   } | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
@@ -59,7 +54,7 @@ export default function SiteShell({
   };
 
   const openCalc = useCallback(
-    (preset?: { pet: PetKind; categoryId?: string; productId?: string }) => {
+    (preset?: { pet: PetKind; sizeId?: string; productId?: string }) => {
       setCalcPreset(preset ?? null);
       setCalcOpen(true);
     },
@@ -75,10 +70,10 @@ export default function SiteShell({
   const petLabel = (p: PetKind) =>
     ({ cat: L.petCat, dog: L.petDog, reptile: L.petReptile, rodent: L.petRodent })[p];
 
-  const cats = useMemo(() => categoriesFor(pet), [pet]);
-  const category: SizeCategory =
-    cats.find((c) => c.id === categoryId) ?? cats[0];
-  const dims = useMemo(() => dimsForCategory(category), [category]);
+  const options = useMemo(() => sizesFor(pet), [pet]);
+  const option: PetSize =
+    options.find((o) => o.sizeId === sizeId) ?? options[0];
+  const size = sizeById(option.sizeId)!;
 
   const list = products
     .filter((p) => p.pet === pet)
@@ -86,7 +81,7 @@ export default function SiteShell({
 
   const choosePet = (p: PetKind) => {
     setPet(p);
-    setCategoryId(categoriesFor(p)[0].id);
+    setSizeId(sizesFor(p)[0].sizeId);
     railRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
@@ -178,21 +173,27 @@ export default function SiteShell({
           <div className="sizebar">
             <span className="caps muted sizebar-label">{L.sizeGroup}</span>
             <div className="sizebar-chips">
-              {cats.map((c) => (
-                <button
-                  key={c.id}
-                  className="size-chip"
-                  aria-pressed={c.id === category.id}
-                  onClick={() => setCategoryId(c.id)}
-                >
-                  <span className="size-chip-name">
-                    {lang === "uk" ? c.label_uk : c.label_en}
-                  </span>
-                  <span className="size-chip-ex">
-                    {lang === "uk" ? c.examples_uk : c.examples_en}
-                  </span>
-                </button>
-              ))}
+              {options.map((o) => {
+                const s = sizeById(o.sizeId)!;
+                return (
+                  <button
+                    key={o.sizeId}
+                    className="size-chip"
+                    aria-pressed={o.sizeId === option.sizeId}
+                    onClick={() => setSizeId(o.sizeId)}
+                  >
+                    <span className="size-chip-name">
+                      {lang === "uk" ? o.label_uk : o.label_en}
+                    </span>
+                    <span className="size-chip-ex">
+                      {lang === "uk" ? o.examples_uk : o.examples_en}
+                    </span>
+                    <span className="size-chip-dim">
+                      {s.length}×{s.width}×{s.height} см
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -226,17 +227,19 @@ export default function SiteShell({
 
                   <div className="card-meta">
                     <span className="caps muted">
-                      {L.typicalSize} · {dims.length}×{dims.width}×{dims.height} см
+                      {L.corpusLabel} {size.code} · {size.length}×{size.width}×{size.height} см
                     </span>
                     <span className="card-price">
-                      {priceFor(p, dims.length).toLocaleString("uk-UA")} {L.uah}
+                      {priceOf(p, size.id) > 0
+                        ? `${priceOf(p, size.id).toLocaleString("uk-UA")} ${L.uah}`
+                        : "—"}
                     </span>
                   </div>
 
                   <button
                     className="btn btn-sm card-cta"
                     onClick={() =>
-                      openCalc({ pet: p.pet, categoryId: category.id, productId: p.id })
+                      openCalc({ pet: p.pet, sizeId: option.sizeId, productId: p.id })
                     }
                   >
                     {L.orderThis}

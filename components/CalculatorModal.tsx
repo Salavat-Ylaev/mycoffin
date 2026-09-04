@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import {
-  calcDimensions,
-  categoriesFor,
-  categoryForWeight,
+  sizesFor,
+  sizeById,
+  sizeForWeight,
+  maxStandardWeight,
   pickOffers,
-  SHAPES,
-  type Dimensions,
+  type CoffinSize,
   type Offer,
+  type PetSize,
 } from "@/lib/calc";
 import { t, type Lang } from "@/lib/i18n";
 import CoffinArt from "./CoffinArt";
@@ -26,7 +27,7 @@ interface Props {
   lang: Lang;
   products: Product[];
   engraving: EngravingOption[];
-  preset: { pet: PetKind; categoryId?: string; productId?: string } | null;
+  preset: { pet: PetKind; sizeId?: string; productId?: string } | null;
   onClose: () => void;
 }
 
@@ -40,15 +41,16 @@ export default function CalculatorModal({
   const L = t(lang);
 
   const startPet: PetKind = preset?.pet ?? "cat";
-  const startCat =
-    categoriesFor(startPet).find((c) => c.id === preset?.categoryId) ??
-    categoriesFor(startPet)[0];
+  const startSize =
+    sizesFor(startPet).find((o) => o.sizeId === preset?.sizeId) ??
+    sizesFor(startPet)[0];
 
   const [step, setStep] = useState(1);
   const [pet, setPet] = useState<PetKind>(startPet);
-  const [categoryId, setCategoryId] = useState(startCat.id);
-  const [weight, setWeight] = useState<string>(String(startCat.refWeight));
-  const [dims, setDims] = useState<Dimensions | null>(null);
+  const [sizeId, setSizeId] = useState(startSize.sizeId);
+  const [weight, setWeight] = useState<string>(String(startSize.maxWeight));
+  const [size, setSize] = useState<CoffinSize | null>(null);
+  const [overWeight, setOverWeight] = useState(false);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [chosen, setChosen] = useState<Offer | null>(null);
 
@@ -85,7 +87,7 @@ export default function CalculatorModal({
   const petLabel = (p: PetKind) =>
     ({ cat: L.petCat, dog: L.petDog, reptile: L.petReptile, rodent: L.petRodent })[p];
 
-  const cats = useMemo(() => categoriesFor(pet), [pet]);
+  const sizeOptions = useMemo(() => sizesFor(pet), [pet]);
   const options = useMemo(
     () => engraving.filter((o) => o.enabled).sort((a, b) => a.sort - b.sort),
     [engraving]
@@ -96,21 +98,21 @@ export default function CalculatorModal({
   const needsText = engSelected.some((o) => o.needs_text);
   const total = (chosen?.price ?? 0) + engPrice;
   // +1–3 дні потрібні лише на нестандартний розмір або нанесення
-  const needsExtraDays = engIds.length > 0 || (chosen ? !chosen.exactFit : false);
+  const needsExtraDays = engIds.length > 0 || overWeight;
   const leadLine = needsExtraDays ? L.leadPlus : L.leadBase;
 
   const choosePet = (p: PetKind) => {
-    const c = categoriesFor(p)[0];
+    const o = sizesFor(p)[0];
     setPet(p);
-    setCategoryId(c.id);
-    setWeight(String(c.refWeight));
+    setSizeId(o.sizeId);
+    setWeight(String(o.maxWeight));
   };
 
-  const chooseCategory = (id: string) => {
-    const c = cats.find((x) => x.id === id);
-    if (!c) return;
-    setCategoryId(id);
-    setWeight(String(c.refWeight));
+  const chooseSize = (id: string) => {
+    const o = sizeOptions.find((x) => x.sizeId === id);
+    if (!o) return;
+    setSizeId(id);
+    setWeight(String(o.maxWeight));
   };
 
   const calculate = () => {
@@ -120,11 +122,17 @@ export default function CalculatorModal({
       return;
     }
     setError("");
-    const d = calcDimensions(pet, w);
-    const list = pickOffers(products, pet, d, 4);
-    setDims(d);
+
+    // вага вирішує, який стандартний корпус потрібен
+    const { option, custom } = sizeForWeight(pet, w);
+    const s = sizeById(option.sizeId)!;
+    const list = pickOffers(products, pet, option.sizeId, custom);
+
+    setSizeId(option.sizeId);
+    setSize(s);
+    setOverWeight(custom);
     setOffers(list);
-    setCategoryId(categoryForWeight(pet, w).id);
+
     // якщо прийшли з картки каталогу — одразу підсвічуємо ту модель
     const pre = preset?.productId
       ? list.find((o) => o.product.id === preset.productId)
@@ -137,7 +145,7 @@ export default function CalculatorModal({
     setEngIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   const submit = async () => {
-    if (!chosen || !dims) return;
+    if (!chosen || !size) return;
 
     const phoneOk = /^[\d+\s()\-]{9,20}$/.test(form.phone.trim());
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
@@ -158,7 +166,7 @@ export default function CalculatorModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pet,
-          category_id: categoryId,
+          size_id: size.id,
           weight_kg: Number(String(weight).replace(",", ".")),
           ...form,
           product_id: chosen.product.id,
@@ -226,21 +234,30 @@ export default function CalculatorModal({
               <div className="field">
                 <label>{L.calcCategoryLabel}</label>
                 <div className="cat-picker">
-                  {cats.map((c) => (
-                    <button
-                      key={c.id}
-                      className="cat-option"
-                      aria-pressed={c.id === categoryId}
-                      onClick={() => chooseCategory(c.id)}
-                    >
-                      <span className="cat-name">
-                        {lang === "uk" ? c.label_uk : c.label_en}
-                      </span>
-                      <span className="cat-ex">
-                        {lang === "uk" ? c.examples_uk : c.examples_en}
-                      </span>
-                    </button>
-                  ))}
+                  {sizeOptions.map((o: PetSize) => {
+                    const s = sizeById(o.sizeId)!;
+                    return (
+                      <button
+                        key={o.sizeId}
+                        className="cat-option"
+                        aria-pressed={o.sizeId === sizeId}
+                        onClick={() => chooseSize(o.sizeId)}
+                      >
+                        <span className="cat-name">
+                          {lang === "uk" ? o.label_uk : o.label_en}
+                          <span className="cat-dim">
+                            {s.length}×{s.width}×{s.height} см
+                          </span>
+                        </span>
+                        <span className="cat-ex">
+                          {lang === "uk" ? o.examples_uk : o.examples_en}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="caps muted" style={{ marginTop: 10, letterSpacing: ".08em" }}>
+                  {L.calcSizeHint}
                 </div>
               </div>
 
@@ -251,8 +268,8 @@ export default function CalculatorModal({
                 <input
                   type="number"
                   inputMode="decimal"
-                  min={SHAPES[pet].weight[0]}
-                  max={SHAPES[pet].weight[1]}
+                  min={0.02}
+                  max={maxStandardWeight(pet) * 2}
                   step="0.1"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
@@ -275,28 +292,32 @@ export default function CalculatorModal({
           )}
 
           {/* ─── КРОК 2 ─── */}
-          {step === 2 && dims && (
+          {step === 2 && size && (
             <>
               <div className="result-box">
-                <div className="caps muted">{L.calcResultTitle}</div>
+                <div className="caps muted">
+                  {L.calcResultTitle} · {size.code}
+                </div>
                 <div className="result-dims">
                   <div>
                     <span className="caps muted">{L.calcLength}</span>
-                    <strong>{dims.length}</strong>
+                    <strong>{size.length}</strong>
                     <span className="caps muted">см</span>
                   </div>
                   <div>
                     <span className="caps muted">{L.calcWidth}</span>
-                    <strong>{dims.width}</strong>
+                    <strong>{size.width}</strong>
                     <span className="caps muted">см</span>
                   </div>
                   <div>
                     <span className="caps muted">{L.calcHeight}</span>
-                    <strong>{dims.height}</strong>
+                    <strong>{size.height}</strong>
                     <span className="caps muted">см</span>
                   </div>
                 </div>
               </div>
+
+              {overWeight && <div className="notice">{L.calcOverWeight}</div>}
 
               <div className="caps muted" style={{ marginBottom: 14 }}>
                 {L.calcOffersTitle}
@@ -325,9 +346,9 @@ export default function CalculatorModal({
                     <div className="offer-price">
                       <span
                         className="caps"
-                        style={{ color: o.exactFit ? "var(--gold)" : "var(--grey)" }}
+                        style={{ color: o.custom ? "var(--grey)" : "var(--gold)" }}
                       >
-                        {o.exactFit ? L.calcExact : L.calcCustom}
+                        {o.custom ? L.calcCustom : L.calcExact}
                       </span>
                       <span style={{ fontSize: 14 }}>
                         {money(o.price)} {L.uah}
@@ -354,12 +375,12 @@ export default function CalculatorModal({
           )}
 
           {/* ─── КРОК 3 ─── */}
-          {step === 3 && chosen && dims && (
+          {step === 3 && chosen && size && (
             <>
               <div className="notice">
                 <b>{lang === "uk" ? chosen.product.name_uk : chosen.product.name_en}</b>
                 {" · "}
-                {dims.length}×{dims.width}×{dims.height} см
+                {L.corpusLabel} {size.code} · {size.length}×{size.width}×{size.height} см
                 {" · "}
                 {money(chosen.price)} {L.uah}
               </div>

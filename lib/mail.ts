@@ -74,7 +74,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
   <table style="width:100%;border-collapse:collapse;margin:26px 0;font-size:14px;">
     ${row("Модель", esc(o.item.product_name))}
     ${row("Матеріал", esc(o.item.material))}
-    ${row("Внутрішній розмір", `${o.item.length_cm} × ${o.item.width_cm} × ${o.item.height_cm} см`)}
+    ${row("Корпус", `${esc(o.item.size_code)} · ${o.item.length_cm} × ${o.item.width_cm} × ${o.item.height_cm} см`)}
     ${row("Труна", money(o.item.price_uah))}
     ${hasEngraving ? row("Нанесення", `${esc(o.engraving.labels.join(", "))} — ${money(o.engraving.price_uah)}`) : ""}
     ${hasEngraving && o.engraving.text ? row("Текст нанесення", `«${esc(o.engraving.text)}»`) : ""}
@@ -109,7 +109,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
       html,
       text:
         `Вітаємо, ${o.first_name}.\n\nМи отримали ваше замовлення №${o.id}.\n` +
-        `Модель: ${o.item.product_name}\nРозмір: ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см\n` +
+        `Модель: ${o.item.product_name}\nКорпус ${o.item.size_code}: ${o.item.length_cm}×${o.item.width_cm}×${o.item.height_cm} см\n` +
         `Труна: ${money(o.item.price_uah)}\n` +
         (hasEngraving
           ? `Нанесення: ${o.engraving.labels.join(", ")} — ${money(o.engraving.price_uah)}\n` +
