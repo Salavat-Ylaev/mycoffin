@@ -55,6 +55,8 @@ export interface OrderItem {
   length_cm: number;
   width_cm: number;
   height_cm: number;
+  /** true — довжина виходить за штатний діапазон моделі, потрібні +1–3 дні */
+  custom_size: boolean;
 }
 
 export interface OrderEngraving {

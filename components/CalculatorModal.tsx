@@ -95,6 +95,9 @@ export default function CalculatorModal({
   const engPrice = engSelected.reduce((s, o) => s + o.price_uah, 0);
   const needsText = engSelected.some((o) => o.needs_text);
   const total = (chosen?.price ?? 0) + engPrice;
+  // +1–3 дні потрібні лише на нестандартний розмір або нанесення
+  const needsExtraDays = engIds.length > 0 || (chosen ? !chosen.exactFit : false);
+  const leadLine = needsExtraDays ? L.leadPlus : L.leadBase;
 
   const choosePet = (p: PetKind) => {
     const c = categoriesFor(p)[0];
@@ -429,7 +432,7 @@ export default function CalculatorModal({
                   </span>
                 </div>
                 <div className="caps muted totals-lead">
-                  {L.leadTitle}: {engIds.length ? L.leadEngraving : L.leadBase}
+                  {L.leadTitle}: {leadLine}
                 </div>
               </div>
 
@@ -537,7 +540,7 @@ export default function CalculatorModal({
               </div>
 
               <div className="caps muted">
-                {L.leadTitle}: {engIds.length ? L.leadEngraving : L.leadBase}
+                {L.leadTitle}: {leadLine}
               </div>
 
               <button

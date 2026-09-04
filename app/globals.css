@@ -1223,3 +1223,175 @@ img {
   color: var(--grey);
   letter-spacing: 0.14em;
 }
+
+/* ─────────────── діагностика в адмінці ─────────────── */
+
+.check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+
+.check-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: var(--grey);
+}
+
+.check-ok {
+  border-left-color: #3f6b52;
+}
+.check-ok .check-dot {
+  background: #3f6b52;
+}
+
+.check-fail {
+  border-left-color: #a33;
+}
+.check-fail .check-dot {
+  background: #a33;
+}
+
+.check-off {
+  border-left-color: var(--gold);
+}
+.check-off .check-dot {
+  background: var(--gold);
+}
+
+.check-title {
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.check-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-70);
+}
+
+.env-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 6px 22px;
+}
+
+.env-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 9px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.env-row code {
+  font-family: ui-monospace, "Consolas", monospace;
+  font-size: 11.5px;
+  overflow-x: auto;
+}
+
+.env-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a33;
+}
+
+.env-dot.on {
+  background: #3f6b52;
+}
+
+/* ─────────────── діагностика в адмінці ─────────────── */
+
+.check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+
+.check-ok {
+  border-left-color: #3f6b52;
+}
+
+.check-fail {
+  border-left-color: #a33;
+}
+
+.check-off {
+  border-left-color: var(--grey);
+}
+
+.check-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: var(--grey);
+}
+
+.check-ok .check-dot {
+  background: #3f6b52;
+}
+
+.check-fail .check-dot {
+  background: #a33;
+}
+
+.check-title {
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.check-text {
+  font-size: 13px;
+  color: var(--ink-70);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.env-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px 20px;
+}
+
+.env-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.env-row code {
+  font-family: "Consolas", ui-monospace, monospace;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+.env-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a33;
+}
+
+.env-dot.on {
+  background: #3f6b52;
+}

@@ -66,6 +66,10 @@ export async function POST(req: NextRequest) {
     const dims = calcDimensions(pet, weight);
     const price = priceFor(product, dims.length);
 
+    // чи потрапляє довжина у штатний діапазон моделі
+    const customSize =
+      dims.length < product.min_length_cm || dims.length > product.max_length_cm;
+
     // додаткові послуги теж перевіряємо за нашим прайсом
     const allOptions = await getEngravingOptions();
     const requested: string[] = Array.isArray(body.engraving_ids)
@@ -102,6 +106,7 @@ export async function POST(req: NextRequest) {
         length_cm: dims.length,
         width_cm: dims.width,
         height_cm: dims.height,
+        custom_size: customSize,
       },
       engraving: {
         ids: selected.map((o) => o.id),
@@ -112,9 +117,8 @@ export async function POST(req: NextRequest) {
       total_uah: price + engravingPrice,
     };
 
-    await createOrder(order);
-
-    // сповіщення — не блокують відповідь клієнту, якщо сервіс не налаштований
+    // Спершу сповіщення, і лише потім запис у базу.
+    // Замовлення має дійти до майстерні навіть якщо база тимчасово недоступна.
     const [tg, own, cust] = await Promise.all([
       notifyTelegram(order),
       mailOwner(order),
@@ -122,8 +126,16 @@ export async function POST(req: NextRequest) {
     ]);
     if (!tg && !own) {
       console.warn(
-        `Замовлення ${order.id} збережено, але сповіщення не надіслані: не налаштовані Telegram і SMTP.`
+        `Замовлення ${order.id}: сповіщення не надіслані — перевірте Telegram і SMTP у налаштуваннях.`
       );
+    }
+
+    let saved = true;
+    try {
+      await createOrder(order);
+    } catch (e) {
+      saved = false;
+      console.error(`Замовлення ${order.id} не збережено в базу:`, e);
     }
 
     return NextResponse.json({
@@ -131,6 +143,8 @@ export async function POST(req: NextRequest) {
       price: order.item.price_uah,
       engraving_price: engravingPrice,
       total: order.total_uah,
+      custom_size: customSize,
+      saved,
       notified: { telegram: tg, owner_email: own, customer_email: cust },
     });
   } catch (e) {

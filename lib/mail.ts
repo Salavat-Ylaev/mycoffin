@@ -54,6 +54,9 @@ export async function mailCustomer(o: Order): Promise<boolean> {
     process.env.NEXT_PUBLIC_PAYMENT_DETAILS || "Реквізити надішле менеджер";
   const phone = process.env.NEXT_PUBLIC_PHONE || "";
   const hasEngraving = Boolean(o.engraving && o.engraving.ids.length);
+  const lead = hasEngraving || o.item.custom_size
+    ? "+1–3 дні (індивідуальний розмір або нанесення)"
+    : "У наявності — відправляємо сьогодні";
 
   const html = `
 <div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
@@ -76,7 +79,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
     ${hasEngraving ? row("Нанесення", `${esc(o.engraving.labels.join(", "))} — ${money(o.engraving.price_uah)}`) : ""}
     ${hasEngraving && o.engraving.text ? row("Текст нанесення", `«${esc(o.engraving.text)}»`) : ""}
     ${row("<b>Разом</b>", `<b>${money(o.total_uah)}</b>`)}
-    ${row("Термін виготовлення", hasEngraving ? "1–3 дні + 1–3 дні на нанесення" : "1–3 дні")}
+    ${row("Термін відправки", lead)}
     ${row("Відділення пошти", esc(o.post_office))}
     ${row("Оплата", "Переказ на реквізити")}
   </table>
@@ -113,7 +116,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
             (o.engraving.text ? `Текст: «${o.engraving.text}»\n` : "")
           : "") +
         `Разом: ${money(o.total_uah)}\n` +
-        `Термін: ${hasEngraving ? "1–3 дні + 1–3 дні на нанесення" : "1–3 дні"}\n` +
+        `Термін: ${lead}\n` +
         `Відділення: ${o.post_office}\n\n` +
         `Реквізити: ${details}\n`,
     });
@@ -139,4 +142,44 @@ function esc(s: string) {
     '"': "&quot;",
   };
   return String(s ?? "").replace(/[<>&"]/g, (c) => map[c] ?? c);
+}
+
+/** Перевірка SMTP: підключення, а за потреби — тестовий лист власнику */
+export async function checkMail(send: boolean): Promise<{
+  configured: boolean;
+  ok: boolean;
+  error?: string;
+}> {
+  if (!mailConfigured()) {
+    const missing = [
+      !process.env.SMTP_HOST && "SMTP_HOST",
+      !process.env.SMTP_USER && "SMTP_USER",
+      !process.env.SMTP_PASS && "SMTP_PASS",
+    ].filter(Boolean);
+    return { configured: false, ok: false, error: `Немає ${missing.join(", ")}` };
+  }
+  if (!process.env.OWNER_EMAIL) {
+    return { configured: false, ok: false, error: "Немає OWNER_EMAIL" };
+  }
+
+  try {
+    await transport().verify();
+    if (!send) return { configured: true, ok: true };
+
+    await transport().sendMail({
+      from: from(),
+      to: process.env.OWNER_EMAIL,
+      subject: "SPOKIY: перевірка пошти",
+      text: "Якщо ви бачите цей лист — сповіщення про замовлення надсилаються правильно.",
+    });
+    return { configured: true, ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "smtp error";
+    const hint = /not verified|unrecognized|sender/i.test(msg)
+      ? " — адресу відправника треба підтвердити в кабінеті Brevo (Senders & Domains)"
+      : /auth/i.test(msg)
+        ? " — перевірте SMTP_USER і SMTP_PASS"
+        : "";
+    return { configured: true, ok: false, error: msg + hint };
+  }
 }

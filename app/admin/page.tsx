@@ -28,7 +28,23 @@ const STATUS_LABEL: Record<Order["status"], string> = {
   cancelled: "Скасовано",
 };
 
-type Tab = "products" | "engraving" | "orders";
+type Tab = "products" | "engraving" | "orders" | "health";
+
+interface Check {
+  configured: boolean;
+  ok: boolean;
+  error?: string;
+  botName?: string;
+  products?: number;
+}
+
+interface Health {
+  env: Record<string, boolean>;
+  telegram: Check;
+  mail: Check;
+  database: Check;
+  tested: boolean;
+}
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -39,6 +55,8 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [engraving, setEngraving] = useState<EngravingOption[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [health, setHealth] = useState<Health | null>(null);
+  const [checking, setChecking] = useState(false);
   const [toast, setToast] = useState("");
 
   const flash = useCallback((msg: string) => {
@@ -66,6 +84,16 @@ export default function AdminPage() {
     if (res.ok) setOrders(await res.json());
   }, []);
 
+  const runHealth = useCallback(async (test: boolean) => {
+    setChecking(true);
+    try {
+      const res = await fetch(`/api/admin/health${test ? "?test=1" : ""}`);
+      if (res.ok) setHealth(await res.json());
+    } finally {
+      setChecking(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
@@ -74,7 +102,8 @@ export default function AdminPage() {
     if (!authed) return;
     if (tab === "orders") loadOrders();
     if (tab === "engraving") loadEngraving();
-  }, [authed, tab, loadOrders, loadEngraving]);
+    if (tab === "health" && !health) runHealth(false);
+  }, [authed, tab, loadOrders, loadEngraving, runHealth, health]);
 
   const login = async (e: FormEvent) => {
     e.preventDefault();
@@ -262,6 +291,9 @@ export default function AdminPage() {
         </button>
         <button className="tab" aria-selected={tab === "orders"} onClick={() => setTab("orders")}>
           Замовлення
+        </button>
+        <button className="tab" aria-selected={tab === "health"} onClick={() => setTab("health")}>
+          Діагностика
         </button>
       </div>
 
@@ -508,7 +540,88 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* ───────── діагностика ───────── */}
+      {tab === "health" && (
+        <>
+          <p className="muted" style={{ maxWidth: "62ch", marginTop: 0 }}>
+            Показує, що бачить сайт саме зараз. Якщо тут щось червоне — замовлення
+            не дійдуть. Кнопка з тестом реально надсилає повідомлення в Telegram
+            і лист на вашу пошту.
+          </p>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 26, flexWrap: "wrap" }}>
+            <button className="btn btn-sm" onClick={() => runHealth(false)} disabled={checking}>
+              {checking ? "Перевіряємо…" : "Перевірити"}
+            </button>
+            <button
+              className="btn btn-sm btn-solid"
+              onClick={() => runHealth(true)}
+              disabled={checking}
+            >
+              Перевірити і надіслати тест
+            </button>
+          </div>
+
+          {health && (
+            <>
+              <CheckRow title="Telegram" check={health.telegram} okText="Бот на зв'язку" />
+              <CheckRow title="Пошта" check={health.mail} okText="SMTP відповідає" />
+              <CheckRow
+                title="База даних"
+                check={health.database}
+                okText={`Supabase підключено, товарів: ${health.database.products ?? 0}`}
+              />
+
+              <div style={{ marginTop: 26 }}>
+                <div className="caps muted" style={{ marginBottom: 12 }}>
+                  Змінні оточення
+                </div>
+                <div className="env-grid">
+                  {Object.entries(health.env).map(([k, v]) => (
+                    <div key={k} className="env-row">
+                      <span className={v ? "env-dot on" : "env-dot"} />
+                      <code>{k}</code>
+                      <span className="muted">{v ? "є" : "немає"}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="muted" style={{ marginTop: 14, fontSize: 13, maxWidth: "62ch" }}>
+                  Якщо на сайті в інтернеті чогось «немає», а в файлі .env воно є —
+                  значить змінну не додали у Vercel: Settings → Environment Variables,
+                  потім Deployments → Redeploy.
+                </p>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
       {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+function CheckRow({
+  title,
+  check,
+  okText,
+}: {
+  title: string;
+  check: Check;
+  okText: string;
+}) {
+  const state = check.ok ? "ok" : check.configured ? "fail" : "off";
+  const label = check.ok ? okText : check.error || "Не налаштовано";
+  return (
+    <div className={`check check-${state}`}>
+      <span className="check-dot" />
+      <div>
+        <div className="check-title">{title}</div>
+        <div className="check-text">{label}</div>
+        {check.botName && check.ok && (
+          <div className="check-text muted">@{check.botName}</div>
+        )}
+      </div>
     </div>
   );
 }
