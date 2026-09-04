@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import { checkTelegram } from "@/lib/telegram";
 import { checkMail } from "@/lib/mail";
-import { getProducts, usingSupabase } from "@/lib/store";
+import { getProducts, usingSupabase, checkStorage } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,7 +21,11 @@ export async function GET(req: NextRequest) {
   const send = new URL(req.url).searchParams.get("test") === "1";
   const has = (name: string) => Boolean(process.env[name]);
 
-  const [telegram, mail] = await Promise.all([checkTelegram(send), checkMail(send)]);
+  const [telegram, mail, storage] = await Promise.all([
+    checkTelegram(send),
+    checkMail(send),
+    checkStorage(),
+  ]);
 
   let database: { configured: boolean; ok: boolean; error?: string; products?: number };
   try {
@@ -50,12 +54,14 @@ export async function GET(req: NextRequest) {
       MAIL_FROM: has("MAIL_FROM"),
       NEXT_PUBLIC_SUPABASE_URL: has("NEXT_PUBLIC_SUPABASE_URL"),
       SUPABASE_SERVICE_ROLE_KEY: has("SUPABASE_SERVICE_ROLE_KEY"),
+      SUPABASE_BUCKET: has("SUPABASE_BUCKET"),
       NEXT_PUBLIC_PAYMENT_DETAILS: has("NEXT_PUBLIC_PAYMENT_DETAILS"),
       NEXT_PUBLIC_PHONE: has("NEXT_PUBLIC_PHONE"),
     },
     telegram,
     mail,
     database,
+    storage,
     tested: send,
   });
 }

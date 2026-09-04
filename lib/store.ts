@@ -211,6 +211,46 @@ export async function setOrderStatus(
 
 /* ─────────────────────────── фото ─────────────────────────── */
 
+/** Перевірка сховища: чи існує корзина і чи вона публічна */
+export async function checkStorage(): Promise<{
+  configured: boolean;
+  ok: boolean;
+  error?: string;
+}> {
+  const bucket = process.env.SUPABASE_BUCKET || "coffins";
+  if (!usingSupabase) {
+    return {
+      configured: false,
+      ok: false,
+      error: "Supabase не підключено — фото можна додати лише посиланням",
+    };
+  }
+  try {
+    const { data, error } = await supabase().storage.getBucket(bucket);
+    if (error || !data) {
+      return {
+        configured: true,
+        ok: false,
+        error: `Корзина «${bucket}» не знайдена. Supabase → Storage → New bucket, ім'я ${bucket}, Public увімкнути.`,
+      };
+    }
+    if (!data.public) {
+      return {
+        configured: true,
+        ok: false,
+        error: `Корзина «${bucket}» не публічна — фото не показуватимуться. Supabase → Storage → ${bucket} → Make public.`,
+      };
+    }
+    return { configured: true, ok: true };
+  } catch (e) {
+    return {
+      configured: true,
+      ok: false,
+      error: e instanceof Error ? e.message : "storage error",
+    };
+  }
+}
+
 /** Завантажує фото в Supabase Storage і повертає публічний URL */
 export async function uploadImage(
   file: ArrayBuffer,

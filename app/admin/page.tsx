@@ -43,6 +43,7 @@ interface Health {
   telegram: Check;
   mail: Check;
   database: Check;
+  storage: Check;
   tested: boolean;
 }
 
@@ -59,9 +60,9 @@ export default function AdminPage() {
   const [checking, setChecking] = useState(false);
   const [toast, setToast] = useState("");
 
-  const flash = useCallback((msg: string) => {
+  const flash = useCallback((msg: string, ms = 2400) => {
     setToast(msg);
-    setTimeout(() => setToast(""), 2400);
+    setTimeout(() => setToast(""), ms);
   }, []);
 
   const loadProducts = useCallback(async () => {
@@ -181,15 +182,68 @@ export default function AdminPage() {
       )
     );
 
+  /**
+   * Фото з телефона важить 5–12 МБ, а хостинг не пропускає тіло запиту
+   * більше ~4,5 МБ — саме тому частина фото раніше не завантажувалась.
+   * Стискаємо прямо в браузері: довша сторона 1600 px, JPEG.
+   * Виходить 200–500 КБ, і сайт від цього ще й швидший.
+   */
+  const compressImage = async (file: File): Promise<Blob> => {
+    const bitmap = await createImageBitmap(file).catch(() => null);
+    if (!bitmap) {
+      throw new Error(
+        "Браузер не відкриває цей файл. Збережіть фото як JPG або PNG (формат HEIC з iPhone не підходить)."
+      );
+    }
+
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Не вдалося обробити фото");
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.82)
+    );
+    if (!blob) throw new Error("Не вдалося стиснути фото");
+    return blob;
+  };
+
   const upload = async (p: Product, file: File) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    flash("Завантажуємо фото…");
-    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) return flash(data.error || "Не вдалося завантажити");
-    patch(p.id, "image", data.url);
-    flash("Фото завантажено — не забудьте «Зберегти»");
+    try {
+      flash("Готуємо фото…");
+      const blob = await compressImage(file);
+
+      const fd = new FormData();
+      fd.append("file", new File([blob], "photo.jpg", { type: "image/jpeg" }));
+
+      flash("Завантажуємо…");
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        /* хостинг міг відповісти не-JSON — покажемо код статусу */
+      }
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || `Сервер відповів помилкою ${res.status}`);
+      }
+
+      // одразу зберігаємо, щоб фото не загубилось, якщо забути натиснути «Зберегти»
+      const updated: Product = { ...p, image: data.url };
+      setProducts((list) => list.map((x) => (x.id === p.id ? updated : x)));
+      await save(updated);
+    } catch (e) {
+      flash(e instanceof Error ? e.message : "Не вдалося завантажити фото", 7000);
+    }
   };
 
   /* ── гравіювання ── */
@@ -329,7 +383,7 @@ export default function AdminPage() {
                   )}
                 </div>
                 <label className="btn btn-sm" style={{ width: "100%", marginTop: 8 }}>
-                  Фото
+                  {p.image ? "Замінити фото" : "Додати фото"}
                   <input
                     type="file"
                     accept="image/*"
@@ -584,6 +638,11 @@ export default function AdminPage() {
                 title="База даних"
                 check={health.database}
                 okText={`Supabase підключено, товарів: ${health.database.products ?? 0}`}
+              />
+              <CheckRow
+                title="Сховище фото"
+                check={health.storage}
+                okText="Корзина на місці, фото показуються"
               />
 
               <div style={{ marginTop: 26 }}>
