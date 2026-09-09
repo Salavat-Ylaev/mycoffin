@@ -100,6 +100,7 @@
     "desc_uk": "Класична форма, тепле дерево, м'яка внутрішня оббивка кольору слонової кістки.",
     "desc_en": "A classic silhouette in warm wood, lined with soft ivory cloth.",
     "prices": {
+      "s2": 4000,
       "s3": 4900,
       "s6": 7000,
       "s7": 9100
@@ -119,6 +120,7 @@
     "desc_uk": "Чисті лінії без декору. Біла матова поверхня, прихована фурнітура.",
     "desc_en": "Clean lines, no ornament. Matte white surface, concealed hardware.",
     "prices": {
+      "s2": 3150,
       "s3": 3850,
       "s6": 5550,
       "s7": 7200
@@ -138,6 +140,7 @@
     "desc_uk": "Глибокий чорний корпус і тонкий золотий кант по периметру кришки.",
     "desc_en": "A deep black body with a thin gold rule around the lid.",
     "prices": {
+      "s2": 4600,
       "s3": 5550,
       "s6": 7900,
       "s7": 10200
@@ -157,6 +160,7 @@
     "desc_uk": "Біла емаль із гравіюванням імені та дат сусальним золотом.",
     "desc_en": "White enamel with the name and dates engraved in gold leaf.",
     "prices": {
+      "s2": 5250,
       "s3": 6400,
       "s6": 9150,
       "s7": 11850
@@ -176,6 +180,7 @@
     "desc_uk": "Біорозкладна модель для поховання в землю. Натуральні матеріали.",
     "desc_en": "A biodegradable model for burial. Natural materials only.",
     "prices": {
+      "s2": 2500,
       "s3": 3000,
       "s6": 4300,
       "s7": 5550

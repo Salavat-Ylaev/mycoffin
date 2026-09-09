@@ -21,7 +21,7 @@ const SIZES = {
 /** Які корпуси доступні кожному виду */
 const PET_SIZES = {
   cat: ["s3", "s4"],
-  dog: ["s3", "s6", "s7"],
+  dog: ["s2", "s3", "s6", "s7"],
   reptile: ["s2", "s5"],
   rodent: ["s1", "s2"],
 };

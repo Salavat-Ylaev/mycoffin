@@ -242,6 +242,8 @@ img{max-width:100%;display:block}
 .size-chip-name{font-size:13px}
 .size-chip-ex{font-size:11px;color:var(--grey)}
 .size-chip[aria-pressed="true"] .size-chip-name{color:var(--gold)}
+.size-chip-dim{font-size:10px;letter-spacing:.1em;color:var(--grey);
+  font-variant-numeric:tabular-nums}
 
 /* ── вибір групи в калькуляторі ── */
 .cat-picker{display:grid;gap:8px}
@@ -252,6 +254,10 @@ img{max-width:100%;display:block}
 .cat-name{font-size:14px}
 .cat-ex{font-size:12px;color:var(--grey)}
 .cat-option[aria-pressed="true"] .cat-name{color:var(--gold)}
+.cat-name{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cat-dim{font-size:11px;color:var(--grey);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.cat-option[aria-pressed="true"] .cat-dim{color:var(--gold)}
 
 /* ── платне нанесення ── */
 .addons{border:1px solid var(--line);padding:18px;margin-bottom:22px}
@@ -325,8 +331,10 @@ const PET_SIZES = [
   {pet:"cat",sizeId:"s4",uk:"Максі",en:"Maxi",
    exuk:"5–12 кг · мейн-кун, рагдол",exen:"5–12 kg · maine coon, ragdoll",max:12},
 
+  {pet:"dog",sizeId:"s2",uk:"Дрібна порода",en:"Toy breed",
+   exuk:"до 4 кг · чихуахуа, той-тер'єр, йорк, шпіц",exen:"up to 4 kg · chihuahua, toy terrier, yorkie, spitz",max:4},
   {pet:"dog",sizeId:"s3",uk:"Мала порода",en:"Small breed",
-   exuk:"до 10 кг · чихуахуа, той, йорк, шпіц",exen:"up to 10 kg · chihuahua, toy, yorkie",max:10},
+   exuk:"4–10 кг · такса, мопс, french bulldog",exen:"4–10 kg · dachshund, pug, french bulldog",max:10},
   {pet:"dog",sizeId:"s6",uk:"Середня порода",en:"Medium breed",
    exuk:"10–35 кг · бігль, кокер, лабрадор",exen:"10–35 kg · beagle, cocker, labrador",max:35},
   {pet:"dog",sizeId:"s7",uk:"Велика порода",en:"Large breed",
@@ -356,9 +364,9 @@ function sizeForWeight(pet, kg) {
 const PRICES = {
   cat:{classic:{s3:4150,s4:4700},minimal:{s3:3100,s4:3550},noir:{s3:4600,s4:5200},
        goldline:{s3:5400,s4:6100},eco:{s3:2350,s4:2650}},
-  dog:{classic:{s3:4900,s6:7000,s7:9100},minimal:{s3:3850,s6:5550,s7:7200},
-       noir:{s3:5550,s6:7900,s7:10200},goldline:{s3:6400,s6:9150,s7:11850},
-       eco:{s3:3000,s6:4300,s7:5550}},
+  dog:{classic:{s2:4000,s3:4900,s6:7000,s7:9100},minimal:{s2:3150,s3:3850,s6:5550,s7:7200},
+       noir:{s2:4600,s3:5550,s6:7900,s7:10200},goldline:{s2:5250,s3:6400,s6:9150,s7:11850},
+       eco:{s2:2500,s3:3000,s6:4300,s7:5550}},
   reptile:{classic:{s2:2850,s5:5000},minimal:{s2:2200,s5:3900},noir:{s2:3150,s5:5500},
            goldline:{s2:3700,s5:6500},eco:{s2:1650,s5:2900}},
   rodent:{classic:{s1:1650,s2:2650},minimal:{s1:1250,s2:2050},noir:{s1:1850,s2:2950},

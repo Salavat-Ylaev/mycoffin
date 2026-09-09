@@ -6,8 +6,8 @@ import type { PetKind, Product } from "./types";
  * Розміри більше не рахуються під кожну тварину окремо — це неможливо
  * поставити на потік. Замість цього сім стандартних корпусів, які меблевий
  * цех ріже серіями. Частина корпусів спільна для різних тварин:
- * кіт до 5 кг і пес до 10 кг лягають в один, великий гризун і дрібна
- * рептилія — в інший.
+ * C2 закриває дрібну породу собак, великого гризуна і дрібну рептилію;
+ * C3 — кота до 5 кг і малу породу собак до 10 кг.
  *
  * Усі розміри — ВНУТРІШНІ, у сантиметрах, кратні 5.
  */
@@ -70,11 +70,20 @@ export const PET_SIZES: PetSize[] = [
 
   {
     pet: "dog",
+    sizeId: "s2",
+    label_uk: "Дрібна порода",
+    label_en: "Toy breed",
+    examples_uk: "до 4 кг · чихуахуа, той-тер'єр, йорк, шпіц",
+    examples_en: "up to 4 kg · chihuahua, toy terrier, yorkie, spitz",
+    maxWeight: 4,
+  },
+  {
+    pet: "dog",
     sizeId: "s3",
     label_uk: "Мала порода",
     label_en: "Small breed",
-    examples_uk: "до 10 кг · чихуахуа, той, йорк, шпіц",
-    examples_en: "up to 10 kg · chihuahua, toy, yorkie, spitz",
+    examples_uk: "4–10 кг · такса, мопс, french bulldog",
+    examples_en: "4–10 kg · dachshund, pug, french bulldog",
     maxWeight: 10,
   },
   {
