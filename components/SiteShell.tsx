@@ -5,6 +5,7 @@ import type { EngravingOption, PetKind, Product } from "@/lib/types";
 import { PET_KINDS } from "@/lib/types";
 import { t, type Lang } from "@/lib/i18n";
 import { sizesFor, sizeById, priceOf, type PetSize } from "@/lib/calc";
+import { CATEGORIES } from "@/lib/categories";
 import ProductImage from "./ProductImage";
 import CalculatorModal from "./CalculatorModal";
 import ContactModal from "./ContactModal";
@@ -169,6 +170,16 @@ export default function SiteShell({
             ))}
           </div>
 
+          {/* сторінки розділів — щоб Google бачив їх не лише з карти сайту */}
+          <div className="home-links">
+            <span className="caps muted home-links-label">Докладно</span>
+            {CATEGORIES.map((c) => (
+              <a href={`/${c.slug}`} key={c.slug}>
+                {c.h1}
+              </a>
+            ))}
+          </div>
+
           {/* розмірні групи всередині типу тварини */}
           <div className="sizebar">
             <span className="caps muted sizebar-label">{L.sizeGroup}</span>
@@ -283,7 +294,9 @@ export default function SiteShell({
         <div className="footer-links caps">
           <button onClick={() => setContactOpen(true)}>{L.ctaWrite}</button>
           <button onClick={() => openCalc()}>{L.ctaCalc}</button>
-          <a href="/admin">Admin</a>
+          <a href="/admin" rel="nofollow">
+            Admin
+          </a>
           <span className="muted">
             © {new Date().getFullYear()} {L.brand}. {L.footerRights}
           </span>

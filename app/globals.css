@@ -1410,3 +1410,295 @@ img {
   margin-left: 8px;
   font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================
+   Сторінки розділів (/truny-dlya-kotiv і решта).
+   Та сама система, що й на головній: тонкі лінії, капс із широким
+   трекінгом, жодних тіней і заокруглень. Префікс .pg- щоб не
+   плутати з .cat-* — ті належать калькулятору.
+   ============================================================ */
+
+.pg-crumbs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 26px var(--pad) 0;
+  color: var(--grey);
+}
+.pg-crumbs a {
+  color: var(--grey);
+  transition: color 0.2s;
+}
+.pg-crumbs a:hover {
+  color: var(--ink);
+}
+
+/* ── заголовок розділу ── */
+.pg-hero {
+  padding: clamp(28px, 5vw, 56px) var(--pad) clamp(40px, 6vw, 72px);
+  border-bottom: 1px solid var(--line);
+}
+.pg-hero h1 {
+  margin: 0 0 22px;
+  font-size: clamp(36px, 6.4vw, 76px);
+  text-wrap: balance;
+  max-width: 16ch;
+}
+.pg-lede {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ink-70);
+  max-width: 58ch;
+}
+.pg-cta {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+.pg-from {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pg-from strong {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* ── секція ── */
+.pg-block {
+  padding: clamp(40px, 6vw, 76px) var(--pad);
+  border-bottom: 1px solid var(--line);
+}
+.pg-block > h2,
+.pg-sec > h2 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3.4vw, 38px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+.pg-note {
+  margin: 0 0 26px;
+  color: var(--grey);
+  font-size: 13.5px;
+  line-height: 1.75;
+  max-width: 62ch;
+}
+.pg-fine {
+  margin: 14px 0 0;
+  color: var(--grey);
+  font-size: 12px;
+  line-height: 1.7;
+  max-width: 62ch;
+}
+
+/* ── таблиця розмірів ── */
+.pg-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+.pg-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+  font-size: 13.5px;
+  background: var(--paper);
+}
+.pg-table th {
+  text-align: left;
+  font-weight: 400;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+.pg-table td {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  color: var(--ink-70);
+}
+.pg-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.pg-table td strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 14.5px;
+}
+.pg-table .pg-code {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+.pg-table .num {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pg-table .dim {
+  color: var(--ink);
+}
+.pg-table .ex {
+  min-width: 190px;
+}
+.pg-table th.num {
+  text-align: right;
+}
+.pg-table td.num.dim {
+  text-align: right;
+}
+
+/* ── сітка моделей ── */
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.pg-card {
+  min-height: 100%;
+}
+
+/* ── текстові розділи ── */
+.pg-prose {
+  padding: clamp(40px, 6vw, 76px) var(--pad);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: clamp(32px, 4vw, 52px);
+}
+.pg-sec {
+  display: block;
+}
+.pg-sec p {
+  margin: 0 0 14px;
+  font-size: 14.5px;
+  line-height: 1.9;
+  color: var(--ink-70);
+  max-width: 66ch;
+}
+.pg-sec p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── питання ── */
+.pg-faq {
+  border-top: 1px solid var(--line);
+}
+.pg-faq-item {
+  border-bottom: 1px solid var(--line);
+}
+.pg-faq-item > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 40px 18px 0;
+  position: relative;
+  font-size: 15.5px;
+  line-height: 1.5;
+  transition: color 0.2s;
+}
+.pg-faq-item > summary::-webkit-details-marker {
+  display: none;
+}
+.pg-faq-item > summary:hover {
+  color: var(--gold);
+}
+.pg-faq-item > summary::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 25px;
+  width: 9px;
+  height: 9px;
+  border-right: 1px solid var(--grey);
+  border-bottom: 1px solid var(--grey);
+  transform: rotate(45deg);
+  transition: transform 0.22s ease;
+}
+.pg-faq-item[open] > summary::after {
+  transform: rotate(-135deg);
+  top: 28px;
+}
+.pg-faq-item p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-70);
+  max-width: 66ch;
+}
+
+/* ── перелінковка ── */
+.pg-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.pg-link {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 22px 24px 26px;
+  background: var(--paper);
+  transition: background 0.2s;
+}
+.pg-link:hover {
+  background: var(--paper-2);
+}
+.pg-link-t {
+  font-family: var(--display);
+  font-size: 23px;
+  line-height: 1.2;
+}
+.pg-link:hover .pg-link-t {
+  color: var(--gold);
+}
+
+/* ── перелінковка на головній ── */
+.home-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 26px var(--pad) 0;
+  align-items: center;
+}
+.home-links-label {
+  flex: none;
+}
+.home-links a {
+  border: 1px solid var(--line);
+  padding: 8px 15px;
+  font-size: 13px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.home-links a:hover {
+  border-color: var(--ink);
+  color: var(--gold);
+}
+
+@media (max-width: 560px) {
+  .pg-hero h1 {
+    max-width: none;
+  }
+  .pg-cta {
+    gap: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pg-faq-item > summary::after {
+    transition: none;
+  }
+}
