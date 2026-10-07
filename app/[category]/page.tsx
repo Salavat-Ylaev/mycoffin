@@ -34,11 +34,15 @@ export async function generateMetadata({
       url: `/${cat.slug}`,
       title: cat.title,
       description: cat.description,
+      // картинку треба вказати явно: свій блок openGraph замінює
+      // батьківський цілком, і файл app/opengraph-image.png сюди не доїжджає
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: BRAND }],
     },
     twitter: {
       card: "summary_large_image",
       title: cat.title,
       description: cat.description,
+      images: ["/opengraph-image.png"],
     },
   };
 }
