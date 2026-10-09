@@ -97,7 +97,7 @@ export async function checkTelegram(send: boolean): Promise<{
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: "SPOKIY: перевірка зв'язку. Якщо ви це бачите — сповіщення про замовлення працюють.",
+        text: "Pet Skorbota: перевірка зв'язку. Якщо ви це бачите — сповіщення про замовлення працюють.",
       }),
     });
     const json = await res.json();

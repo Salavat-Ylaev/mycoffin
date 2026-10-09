@@ -38,14 +38,14 @@ function transport(): Transporter {
 }
 
 const from = () =>
-  process.env.MAIL_FROM || `SPOKIY <${process.env.SMTP_USER ?? "no-reply@localhost"}>`;
+  process.env.MAIL_FROM || `Pet Skorbota <${process.env.SMTP_USER ?? "no-reply@localhost"}>`;
 
 /** Розбирає `Ім'я <адреса>` на частини — цього вимагає API Brevo */
 function parseFrom(): { name: string; email: string } {
   const raw = from().trim();
   const m = raw.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
-  if (m) return { name: m[1].trim() || "SPOKIY", email: m[2].trim() };
-  return { name: "SPOKIY", email: raw.replace(/[<>]/g, "").trim() };
+  if (m) return { name: m[1].trim() || "Pet Skorbota", email: m[2].trim() };
+  return { name: "Pet Skorbota", email: raw.replace(/[<>]/g, "").trim() };
 }
 
 interface Letter {
@@ -128,7 +128,7 @@ export async function mailCustomer(o: Order): Promise<boolean> {
   const html = `
 <div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <div style="border-bottom:1px solid #111;padding-bottom:14px;margin-bottom:26px;">
-    <div style="letter-spacing:.32em;font-size:13px;text-transform:uppercase;">SPOKIY</div>
+    <div style="letter-spacing:.32em;font-size:13px;text-transform:uppercase;">Pet Skorbota</div>
   </div>
 
   <p style="font-size:15px;line-height:1.7;">Вітаємо, ${esc(o.first_name)}.</p>
@@ -164,14 +164,14 @@ export async function mailCustomer(o: Order): Promise<boolean> {
   </p>
 
   <div style="border-top:1px solid #e3e1de;margin-top:30px;padding-top:14px;font-size:12px;color:#8a8a8a;">
-    SPOKIY · труни для улюбленців на замовлення
+    Pet Skorbota · труни для улюбленців на замовлення
   </div>
 </div>`;
 
   try {
     await send({
       to: o.email,
-      subject: `Замовлення №${o.id} прийнято — SPOKIY`,
+      subject: `Замовлення №${o.id} прийнято — Pet Skorbota`,
       html,
       text:
         `Вітаємо, ${o.first_name}.\n\nМи отримали ваше замовлення №${o.id}.\n` +
@@ -247,7 +247,7 @@ export async function checkMail(doSend: boolean): Promise<{
 
     await send({
       to: process.env.OWNER_EMAIL,
-      subject: "SPOKIY: перевірка пошти",
+      subject: "Pet Skorbota: перевірка пошти",
       text: `Якщо ви бачите цей лист — сповіщення про замовлення надсилаються правильно. Канал: ${channel}.`,
     });
     return { configured: true, ok: true };

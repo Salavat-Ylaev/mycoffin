@@ -309,7 +309,7 @@ export default function AdminPage() {
       <div className="login-wrap">
         <form className="login-card" onSubmit={login}>
           <div className="brand-word" style={{ textAlign: "center" }}>
-            SPOKIY
+            Pet Skorbota
           </div>
           <div
             className="caps muted"
@@ -344,7 +344,7 @@ export default function AdminPage() {
       <div className="admin-head">
         <div>
           <div className="brand-word" style={{ textAlign: "left", fontSize: 20 }}>
-            SPOKIY
+            Pet Skorbota
           </div>
           <div className="caps muted" style={{ marginTop: 8 }}>
             Панель керування

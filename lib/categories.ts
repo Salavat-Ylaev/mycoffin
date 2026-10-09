@@ -17,7 +17,7 @@ export interface CategorySection {
 }
 
 export interface Category {
-  /** адреса: spokiy.store/<slug> */
+  /** адреса сторінки: /<slug> */
   slug: string;
   pet: PetKind;
   /** <title> сторінки */

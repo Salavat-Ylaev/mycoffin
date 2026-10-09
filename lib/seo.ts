@@ -2,11 +2,11 @@
  * SEO — одне джерело правди для адреси сайту, розмітки та перевірок.
  *
  * Канонічний домен задається в NEXT_PUBLIC_SITE_URL. Без нього беремо
- * spokiy.store: так canonical і sitemap не зламаються, навіть якщо змінну
+ * petskorbota.store: так canonical і sitemap не зламаються, навіть якщо змінну
  * забули додати в Vercel.
  */
 
-const RAW_SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://spokiy.store";
+const RAW_SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://petskorbota.store";
 
 /** Адреса без слеша в кінці — щоб не плодити //, коли клеїмо шляхи */
 export const SITE_URL = RAW_SITE.replace(/\/+$/, "");
@@ -17,7 +17,7 @@ export const SITE_HOST = SITE_URL.replace(/^https?:\/\//, "");
 export const abs = (path = "/") =>
   `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
-export const BRAND = "SPOKIY";
+export const BRAND = "Pet Skorbota";
 
 /** Контакти беремо з тих самих змінних, що показує сайт */
 export const PHONE = process.env.NEXT_PUBLIC_PHONE || "";

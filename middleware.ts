@@ -3,12 +3,12 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Прибираємо з пошуку технічний домен Vercel.
  *
- * Той самий сайт відповідає і на spokiy.store, і на mycoffin.vercel.app.
+ * Той самий сайт відповідає і на petskorbota.store, і на технічній адресі Vercel.
  * Для Google це дві копії одного сайту. Технічну адресу відправляємо
  * на основну постійним редіректом (308).
  *
- * ВАЖЛИВО: apex і www тут НЕ чіпаємо. Перенаправлення між spokiy.store
- * і www.spokiy.store робить сам Vercel у налаштуваннях домену. Якщо
+ * ВАЖЛИВО: apex і www тут НЕ чіпаємо. Перенаправлення між petskorbota.store
+ * і www.petskorbota.store робить сам Vercel у налаштуваннях домену. Якщо
  * дублювати це ще й тут, два редіректи починають гонити запит по колу
  * і сайт лягає з ERR_TOO_MANY_REDIRECTS. Один редірект має бути в одному
  * місці — у Vercel.
@@ -16,7 +16,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * Працює тільки на проді: preview-деплої і localhost не чіпаємо.
  */
 
-const CANONICAL_HOST = (process.env.NEXT_PUBLIC_SITE_URL || "https://spokiy.store")
+const CANONICAL_HOST = (process.env.NEXT_PUBLIC_SITE_URL || "https://petskorbota.store")
   .replace(/^https?:\/\//, "")
   .replace(/\/+$/, "")
   .toLowerCase();

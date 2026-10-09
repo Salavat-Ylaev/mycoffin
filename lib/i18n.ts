@@ -2,7 +2,7 @@ export type Lang = "uk" | "en";
 
 export const dict = {
   uk: {
-    brand: "SPOKIY",
+    brand: "Pet Skorbota",
     brandSub: "труни для улюбленців · на замовлення",
     navCatalog: "Каталог",
     navAbout: "Про нас",
@@ -20,7 +20,7 @@ export const dict = {
     comfortTitle: "Ми поруч",
     comfortText:
       "Втрата улюбленця — це справжнє горе, і воно не потребує виправдань. Ви не мусите зараз думати про деталі: ми візьмемо це на себе. Кожну труну ми робимо так, ніби прощаємося зі своїм — з увагою до кожного сантиметра, до текстури дерева, до тиші, яка має бути навколо. Обіцяємо: буде зроблено в найкращому вигляді. Ваш улюбленець заслуговує на гідне прощання, і ми про це подбаємо.",
-    comfortSign: "Майстерня SPOKIY",
+    comfortSign: "Майстерня Pet Skorbota",
 
     catalogTitle: "Каталог",
     catalogHint: "Гортайте вбік",
@@ -124,7 +124,7 @@ export const dict = {
   },
 
   en: {
-    brand: "SPOKIY",
+    brand: "Pet Skorbota",
     brandSub: "pet caskets · made to order",
     navCatalog: "Catalogue",
     navAbout: "About",
@@ -142,7 +142,7 @@ export const dict = {
     comfortTitle: "We are here",
     comfortText:
       "Losing a companion is real grief, and it needs no justification. You don't have to think about the details right now — we'll carry that part. Every casket is made the way we would make it for our own: attentive to each centimetre, to the grain of the wood, to the quiet that should surround it. We promise it will be done beautifully. Your companion deserves a dignified farewell, and we will take care of it.",
-    comfortSign: "SPOKIY workshop",
+    comfortSign: "Pet Skorbota workshop",
 
     catalogTitle: "Catalogue",
     catalogHint: "Scroll sideways",
